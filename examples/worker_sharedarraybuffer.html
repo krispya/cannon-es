@@ -16,7 +16,7 @@
     <!-- Worker script, will be run in separate thread -->
     <script id="worker1" type="text/js-worker">
       import * as CANNON from '../dist/cannon-es.js'
-      import * as THREE from 'https://unpkg.com/three@0.122.0/build/three.module.js'
+      import * as THREE from 'https://unpkg.com/three@0.125.2/build/three.module.js'
       import { geometryToShape } from './js/three-conversion-utils.js'
 
       const dt = 1 / 60
@@ -95,9 +95,9 @@
 
     <script type="module">
       import * as CANNON from '../dist/cannon-es.js'
-      import * as THREE from 'https://unpkg.com/three@0.122.0/build/three.module.js'
-      import Stats from 'https://unpkg.com/three@0.122.0/examples/jsm/libs/stats.module.js'
-      import { OrbitControls } from 'https://unpkg.com/three@0.122.0/examples/jsm/controls/OrbitControls.js'
+      import * as THREE from 'https://unpkg.com/three@0.125.2/build/three.module.js'
+      import Stats from 'https://unpkg.com/three@0.125.2/examples/jsm/libs/stats.module.js'
+      import { OrbitControls } from 'https://unpkg.com/three@0.125.2/examples/jsm/controls/OrbitControls.js'
 
       // three.js variables
       let camera, scene, renderer, stats
@@ -183,7 +183,7 @@
         scene.add(floor)
 
         // Cubes
-        const cubeGeometry = new THREE.BoxBufferGeometry()
+        const cubeGeometry = new THREE.BoxGeometry()
         const cubeMaterial = new THREE.MeshStandardMaterial({ color: '#888' })
         for (let i = 0; i < 40; i++) {
           const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial)
@@ -195,7 +195,7 @@
         }
 
         // Torus knots
-        const torusGeometry = new THREE.TorusKnotBufferGeometry()
+        const torusGeometry = new THREE.TorusKnotGeometry()
         const torusMaterial = new THREE.MeshStandardMaterial({ color: '#2b4c7f' })
         for (let i = 0; i < 8; i++) {
           const torusMesh = new THREE.Mesh(torusGeometry, torusMaterial)
@@ -258,13 +258,6 @@
 
         // Create worker
         const worker = new Worker(window.URL.createObjectURL(blob), { type: 'module' })
-
-        worker.addEventListener('message', (event) => {
-          console.log('Message from worker', event.data)
-        })
-        worker.addEventListener('error', (event) => {
-          console.error('Error in worker', event.message)
-        })
 
         // Send the geometry data to setup the cannon.js bodies
         // and the initial position and rotation data

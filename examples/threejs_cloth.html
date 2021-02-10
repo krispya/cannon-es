@@ -16,9 +16,9 @@
   <body>
     <script type="module">
       import * as CANNON from '../dist/cannon-es.js'
-      import * as THREE from 'https://unpkg.com/three@0.122.0/build/three.module.js'
-      import Stats from 'https://unpkg.com/three@0.122.0/examples/jsm/libs/stats.module.js'
-      import { OrbitControls } from 'https://unpkg.com/three@0.122.0/examples/jsm/controls/OrbitControls.js'
+      import * as THREE from 'https://unpkg.com/three@0.125.2/build/three.module.js'
+      import Stats from 'https://unpkg.com/three@0.125.2/examples/jsm/libs/stats.module.js'
+      import { OrbitControls } from 'https://unpkg.com/three@0.125.2/examples/jsm/controls/OrbitControls.js'
 
       /**
        * Example on how to build a simple physics cloth with
@@ -218,13 +218,14 @@
         // Make the three.js cloth follow the cannon.js particles
         for (let i = 0; i < Nx + 1; i++) {
           for (let j = 0; j < Ny + 1; j++) {
+            const position = particles[i][j].position
             const index = j * (Nx + 1) + i
-            clothGeometry.vertices[index].copy(particles[i][j].position)
+            clothGeometry.attributes.position.setXYZ(index, position.x, position.y, position.z)
           }
         }
 
-        clothGeometry.normalsNeedUpdate = true
-        clothGeometry.verticesNeedUpdate = true
+        clothGeometry.attributes.position.needsUpdate = true
+        clothGeometry.computeVertexNormals()
 
         // Move the ball in a circular motion
         const { time } = world

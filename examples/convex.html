@@ -24,13 +24,13 @@
           new CANNON.Vec3(0, 2, 0),
           new CANNON.Vec3(0, 0, 2),
         ]
-        const offset = -0.35
-        for (let i = 0; i < vertices.length; i++) {
-          const v = vertices[i]
-          v.x += offset
-          v.y += offset
-          v.z += offset
-        }
+        // const offset = -0.35
+        // for (let i = 0; i < vertices.length; i++) {
+        //   const v = vertices[i]
+        //   v.x += offset
+        //   v.y += offset
+        //   v.z += offset
+        // }
         return new CANNON.ConvexPolyhedron({
           vertices: vertices,
           faces: [

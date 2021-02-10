@@ -1,8 +1,8 @@
 import * as CANNON from '../../dist/cannon-es.js'
-import * as THREE from 'https://unpkg.com/three@0.122.0/build/three.module.js'
-import Stats from 'https://unpkg.com/three@0.122.0/examples/jsm/libs/stats.module.js'
+import * as THREE from 'https://unpkg.com/three@0.125.2/build/three.module.js'
+import Stats from 'https://unpkg.com/three@0.125.2/examples/jsm/libs/stats.module.js'
 import * as dat from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js'
-import { OrbitControls } from 'https://unpkg.com/three@0.122.0/examples/jsm/controls/OrbitControls.js'
+import { OrbitControls } from 'https://unpkg.com/three@0.125.2/examples/jsm/controls/OrbitControls.js'
 import { SmoothieChart, TimeSeries } from './smoothie.js'
 import { addTitle, addSourceButton } from './dom-utils.js'
 import { bodyToMesh } from './three-conversion-utils.js'
@@ -541,12 +541,12 @@ class Demo extends CANNON.EventTarget {
   initGeometryCaches = () => {
     // Material
     this.materialColor = 0xdddddd
-    this.solidMaterial = new THREE.MeshLambertMaterial({ color: this.materialColor })
+    this.solidMaterial = new THREE.MeshStandardMaterial({ color: this.materialColor })
     //THREE.ColorUtils.adjustHSV( solidMaterial.color, 0, 0, 0.9 );
     this.wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true })
     this.currentMaterial = this.solidMaterial
     const contactDotMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
-    this.particleMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 })
+    this.particleMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 })
 
     const contactPointGeometry = new THREE.SphereGeometry(0.1, 6, 6)
     this.contactMeshCache = new GeometryCache(this.scene, () => {
@@ -554,9 +554,11 @@ class Demo extends CANNON.EventTarget {
     })
 
     this.cm2contactMeshCache = new GeometryCache(this.scene, () => {
-      const geometry = new THREE.Geometry()
-      geometry.vertices.push(new THREE.Vector3(0, 0, 0))
-      geometry.vertices.push(new THREE.Vector3(1, 1, 1))
+      const geometry = new THREE.BufferGeometry()
+      const positions = []
+      positions.push(0, 0, 0)
+      positions.push(1, 1, 1)
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
       return new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0xff0000 }))
     })
 
@@ -570,38 +572,50 @@ class Demo extends CANNON.EventTarget {
     })
 
     this.distanceConstraintMeshCache = new GeometryCache(this.scene, () => {
-      const geometry = new THREE.Geometry()
-      geometry.vertices.push(new THREE.Vector3(0, 0, 0))
-      geometry.vertices.push(new THREE.Vector3(1, 1, 1))
+      const geometry = new THREE.BufferGeometry()
+      const positions = []
+      positions.push(0, 0, 0)
+      positions.push(1, 1, 1)
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
       return new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0xff0000 }))
     })
 
     this.p2pConstraintMeshCache = new GeometryCache(this.scene, () => {
-      const geometry = new THREE.Geometry()
-      geometry.vertices.push(new THREE.Vector3(0, 0, 0))
-      geometry.vertices.push(new THREE.Vector3(1, 1, 1))
+      const geometry = new THREE.BufferGeometry()
+      const positions = []
+      positions.push(0, 0, 0)
+      positions.push(1, 1, 1)
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
       return new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0xff0000 }))
     })
 
     this.normalMeshCache = new GeometryCache(this.scene, () => {
-      const geometry = new THREE.Geometry()
-      geometry.vertices.push(new THREE.Vector3(0, 0, 0))
-      geometry.vertices.push(new THREE.Vector3(1, 1, 1))
+      const geometry = new THREE.BufferGeometry()
+      const positions = []
+      positions.push(0, 0, 0)
+      positions.push(1, 1, 1)
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
       return new THREE.Line(geometry, new THREE.LineBasicMaterial({ color: 0x00ff00 }))
     })
 
     this.axesMeshCache = new GeometryCache(this.scene, () => {
       const mesh = new THREE.Object3D()
-      const origin = new THREE.Vector3(0, 0, 0)
-      const gX = new THREE.Geometry()
-      const gY = new THREE.Geometry()
-      const gZ = new THREE.Geometry()
-      gX.vertices.push(origin)
-      gY.vertices.push(origin)
-      gZ.vertices.push(origin)
-      gX.vertices.push(new THREE.Vector3(1, 0, 0))
-      gY.vertices.push(new THREE.Vector3(0, 1, 0))
-      gZ.vertices.push(new THREE.Vector3(0, 0, 1))
+      const origin = [0, 0, 0]
+      const gX = new THREE.BufferGeometry()
+      const gY = new THREE.BufferGeometry()
+      const gZ = new THREE.BufferGeometry()
+      const gXPositions = []
+      const gYPositions = []
+      const gZPositions = []
+      gXPositions.push(...origin)
+      gYPositions.push(...origin)
+      gZPositions.push(...origin)
+      gXPositions.push(1, 0, 0)
+      gYPositions.push(0, 1, 0)
+      gZPositions.push(0, 0, 1)
+      gX.setAttribute('position', new THREE.Float32BufferAttribute(gXPositions, 3))
+      gY.setAttribute('position', new THREE.Float32BufferAttribute(gYPositions, 3))
+      gZ.setAttribute('position', new THREE.Float32BufferAttribute(gZPositions, 3))
       const lineX = new THREE.Line(gX, new THREE.LineBasicMaterial({ color: 0xff0000 }))
       const lineY = new THREE.Line(gY, new THREE.LineBasicMaterial({ color: 0x00ff00 }))
       const lineZ = new THREE.Line(gZ, new THREE.LineBasicMaterial({ color: 0x0000ff }))
