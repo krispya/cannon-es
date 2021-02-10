@@ -410,34 +410,21 @@ export function geometryToShape(geometry) {
       // Simplify the geometry if it has too many points,
       // make it have no more than MAX_VERTEX_COUNT vertices
       const vertexCount = geometry.attributes.position.count
-
       const MAX_VERTEX_COUNT = 150
       const simplifiedGeometry = new SimplifyModifier().modify(geometry, Math.max(vertexCount - MAX_VERTEX_COUNT, 0))
 
       // Generate convex hull
-      const positionAttribute = simplifiedGeometry.attributes.position
-
-      // transform the attribute into vector3
-      const points = []
-      for (let i = 0; i < positionAttribute.count; i++) {
-        const point = new THREE.Vector3().fromBufferAttribute(positionAttribute, i)
-        points.push(point)
-      }
+      const points = extractVertices(simplifiedGeometry)
       let hullGeometry = new ConvexGeometry(points)
-      // hullGeometry = BufferGeometryUtils.mergeVertices(hullGeometry)
+      hullGeometry.deleteAttribute('normal') // https://discourse.threejs.org/t/three-geometry-will-be-removed-from-core-with-r125/22401/54
+      hullGeometry = BufferGeometryUtils.mergeVertices(hullGeometry)
 
-      hullGeometry = new Geometry().fromBufferGeometry(hullGeometry)
-      console.log(hullGeometry.faces.length)
-      hullGeometry.mergeVertices()
-      console.log(hullGeometry.faces.length)
-      // const vertices = hullGeometry.vertices
-      // const faces = hullGeometry.faces.map((f) => [f.a, f.b, f.c])
-      // const normals = hullGeometry.faces.map((f) => f.normal)
+      // extract vertices
+      const vertices = extractVertices(hullGeometry)
 
-      const geometr = new DirectGeometry().fromGeometry(hullGeometry)
+      // compute faces and faceNormals
+      const { faces, normals } = computeFacesNormals(hullGeometry, vertices)
 
-      const hullBufferGeometry = hullGeometry.toBufferGeometry()
-      const { vertices, faces, normals } = extractVerticesFacesNormals(hullBufferGeometry)
       console.log(vertices.length, faces.length, normals.length)
 
       // Construct polyhedron
@@ -452,45 +439,26 @@ export function geometryToShape(geometry) {
   }
 }
 
-function extractVerticesFacesNormals(geom) {
-  const position = geom.attributes.position
-  const normal = geom.attributes.normal
+function computeFacesNormals(geom, vertices) {
   const index = geom.index
+  console.log(index)
 
-  const vertices = []
+  // compute faces
+  // TODO check how index is computed
   const faces = []
-
-  for (let i = 0; i < vertices.length; i++) {
-    const vertex = new THREE.Vector3().fromBufferAttribute(position, i)
-    vertices.push(vertex)
-    // vertices.push(new CANNON.Vec3().copy(vertex))
-  }
-
-  function addFace(a, b, c) {
-    // const vertexNormals =
-    //   normal === undefined
-    //     ? []
-    //     : [
-    //         new Vector3().fromBufferAttribute(normal, a),
-    //         new Vector3().fromBufferAttribute(normal, b),
-    //         new Vector3().fromBufferAttribute(normal, c),
-    //       ]
-
-    const face = [a, b, c]
-
-    faces.push(face)
-  }
-
   if (index) {
     for (let i = 0; i < index.count; i += 3) {
-      addFace(index.getX(i), index.getX(i + 1), index.getX(i + 2))
+      const face = [index.getX(i), index.getY(i), index.getZ(i)]
+      faces.push(face)
     }
   } else {
     for (let i = 0; i < vertices.length; i += 3) {
-      addFace(i, i + 1, i + 2)
+      const face = [i, i + 1, i + 2]
+      faces.push(face)
     }
   }
 
+  // compute normals
   const faceNormals = []
   const cb = new THREE.Vector3()
   const ab = new THREE.Vector3()
@@ -511,7 +479,16 @@ function extractVerticesFacesNormals(geom) {
     // faceNormals.push(new CANNON.Vec3().copy(cb))
   }
 
-  // mergeVertices
+  return { faces, normals: faceNormals }
+}
 
-  return { vertices, faces, normals: faceNormals }
+// transform the position attribute into Vector3 array
+function extractVertices(bufferGeometry) {
+  const vertices = []
+  const positionAttribute = bufferGeometry.attributes.position
+  for (let i = 0; i < positionAttribute.count; i++) {
+    const vertex = new THREE.Vector3().fromBufferAttribute(positionAttribute, i)
+    vertices.push(vertex)
+  }
+  return vertices
 }
