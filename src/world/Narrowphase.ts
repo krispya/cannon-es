@@ -50,7 +50,7 @@ export const COLLISION_TYPES = {
   particleCylinder: (Shape.types.PARTICLE | Shape.types.CYLINDER) as 192,
   sphereTrimesh: (Shape.types.SPHERE | Shape.types.TRIMESH) as 257,
   planeTrimesh: (Shape.types.PLANE | Shape.types.TRIMESH) as 258,
-  convexTrimesh: (Shape.types.CONVEXPOLYHEDRON | Shape.types.TRIMESH) as 259
+  convexTrimesh: (Shape.types.CONVEXPOLYHEDRON | Shape.types.TRIMESH) as 259,
 }
 
 export type CollisionType = typeof COLLISION_TYPES[keyof typeof COLLISION_TYPES]
@@ -98,7 +98,7 @@ export class Narrowphase {
   [COLLISION_TYPES.particleCylinder]: typeof Narrowphase.prototype.particleCylinder;
   [COLLISION_TYPES.sphereTrimesh]: typeof Narrowphase.prototype.sphereTrimesh;
   [COLLISION_TYPES.planeTrimesh]: typeof Narrowphase.prototype.planeTrimesh;
-  [COLLISION_TYPES.convexTrimesh]: typeof Narrowphase.prototype.convexTrimesh;
+  [COLLISION_TYPES.convexTrimesh]: typeof Narrowphase.prototype.convexTrimesh
 
   constructor(world: World) {
     this.contactPointPool = []
@@ -1868,11 +1868,10 @@ export class Narrowphase {
     bodyTri: Body,
     rshapeCvP?: Shape | null,
     rshapeTri?: Shape | null,
-    justTest?: boolean,
+    justTest?: boolean
   ): true | void {
-
     if (xCvP.distanceTo(xTri) > shapeCvP.boundingSphereRadius + shapeTri.boundingSphereRadius) {
-      return;
+      return
     }
 
     // Construct a temp hull for each triangle
@@ -1883,7 +1882,6 @@ export class Narrowphase {
     const hullB = new ConvexPolyhedron({ vertices: [va, vb, vc], faces: [[0, 1, 2]] })
 
     for (let i = 0; i < shapeTri.indices.length / 3; i++) {
-
       const triangleNormal = new Vec3()
       shapeTri.getNormal(i, triangleNormal)
       hullB.faceNormals = [triangleNormal]
