@@ -46,7 +46,7 @@ declare module "math/Mat3" {
         identity(): void;
         setZero(): void;
         setTrace(vector: Vec3): void;
-        getTrace(target?: Vec3): void;
+        getTrace(target?: Vec3): Vec3;
         vmult(v: Vec3, target?: Vec3): Vec3;
         smult(s: number): void;
         mmult(matrix: Mat3, target?: Mat3): Mat3;
@@ -608,9 +608,9 @@ declare module "world/Narrowphase" {
     import { Vec3Pool } from "utils/Vec3Pool";
     import { ContactEquation } from "equations/ContactEquation";
     import { FrictionEquation } from "equations/FrictionEquation";
+    import { ConvexPolyhedron } from "shapes/ConvexPolyhedron";
     import type { Box } from "shapes/Box";
     import type { Sphere } from "shapes/Sphere";
-    import type { ConvexPolyhedron } from "shapes/ConvexPolyhedron";
     import type { Particle } from "shapes/Particle";
     import type { Plane } from "shapes/Plane";
     import type { Trimesh } from "shapes/Trimesh";
@@ -644,6 +644,7 @@ declare module "world/Narrowphase" {
         particleCylinder: 192;
         sphereTrimesh: 257;
         planeTrimesh: 258;
+        convexTrimesh: 259;
     };
     export type CollisionType = typeof COLLISION_TYPES[keyof typeof COLLISION_TYPES];
     export class Narrowphase {
@@ -680,6 +681,7 @@ declare module "world/Narrowphase" {
         [COLLISION_TYPES.particleCylinder]: typeof Narrowphase.prototype.particleCylinder;
         [COLLISION_TYPES.sphereTrimesh]: typeof Narrowphase.prototype.sphereTrimesh;
         [COLLISION_TYPES.planeTrimesh]: typeof Narrowphase.prototype.planeTrimesh;
+        [COLLISION_TYPES.convexTrimesh]: typeof Narrowphase.prototype.convexTrimesh;
         constructor(world: World);
         createContactEquation(bi: Body, bj: Body, si: Shape, sj: Shape, overrideShapeA?: Shape | null, overrideShapeB?: Shape | null): ContactEquation;
         createFrictionEquationsFromContact(contactEquation: ContactEquation, outArray: FrictionEquation[]): boolean;
@@ -705,6 +707,7 @@ declare module "world/Narrowphase" {
         particleCylinder(si: Particle, sj: Cylinder, xi: Vec3, xj: Vec3, qi: Quaternion, qj: Quaternion, bi: Body, bj: Body, rsi?: Shape | null, rsj?: Shape | null, justTest?: boolean): true | void;
         sphereTrimesh(sphereShape: Sphere, trimeshShape: Trimesh, spherePos: Vec3, trimeshPos: Vec3, sphereQuat: Quaternion, trimeshQuat: Quaternion, sphereBody: Body, trimeshBody: Body, rsi?: Shape | null, rsj?: Shape | null, justTest?: boolean): true | void;
         planeTrimesh(planeShape: Plane, trimeshShape: Trimesh, planePos: Vec3, trimeshPos: Vec3, planeQuat: Quaternion, trimeshQuat: Quaternion, planeBody: Body, trimeshBody: Body, rsi?: Shape | null, rsj?: Shape | null, justTest?: boolean): true | void;
+        convexTrimesh(shapeCvP: ConvexPolyhedron, shapeTri: Trimesh, xCvP: Vec3, xTri: Vec3, qCvP: Quaternion, qTri: Quaternion, bodyCvP: Body, bodyTri: Body, rshapeCvP?: Shape | null, rshapeTri?: Shape | null, justTest?: boolean, faceListA?: number[] | null, faceListB?: number[] | null): true | void;
     }
 }
 declare module "collision/ArrayCollisionMatrix" {
@@ -1079,6 +1082,7 @@ declare module "objects/Body" {
         pointToWorldFrame(localPoint: Vec3, result?: Vec3): Vec3;
         vectorToWorldFrame(localVector: Vec3, result?: Vec3): Vec3;
         addShape(shape: Shape, _offset?: Vec3, _orientation?: Quaternion): Body;
+        removeShape(shape: Shape): Body;
         updateBoundingRadius(): void;
         computeAABB(): void;
         updateInertiaWorld(force?: boolean): void;

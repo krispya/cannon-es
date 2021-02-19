@@ -158,6 +158,7 @@ class Mat3 {
     target.x = e[0];
     target.y = e[4];
     target.z = e[8];
+    return target;
   }
   /**
    * Matrix-Vector multiplication
@@ -198,22 +199,36 @@ class Mat3 {
 
 
   mmult(matrix, target = new Mat3()) {
-    const {
-      elements
-    } = matrix;
-
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        let sum = 0.0;
-
-        for (let k = 0; k < 3; k++) {
-          sum += elements[i + k * 3] * this.elements[k + j * 3];
-        }
-
-        target.elements[i + j * 3] = sum;
-      }
-    }
-
+    const A = this.elements;
+    const B = matrix.elements;
+    const T = target.elements;
+    const a11 = A[0],
+          a12 = A[1],
+          a13 = A[2],
+          a21 = A[3],
+          a22 = A[4],
+          a23 = A[5],
+          a31 = A[6],
+          a32 = A[7],
+          a33 = A[8];
+    const b11 = B[0],
+          b12 = B[1],
+          b13 = B[2],
+          b21 = B[3],
+          b22 = B[4],
+          b23 = B[5],
+          b31 = B[6],
+          b32 = B[7],
+          b33 = B[8];
+    T[0] = a11 * b11 + a12 * b21 + a13 * b31;
+    T[1] = a11 * b12 + a12 * b22 + a13 * b32;
+    T[2] = a11 * b13 + a12 * b23 + a13 * b33;
+    T[3] = a21 * b11 + a22 * b21 + a23 * b31;
+    T[4] = a21 * b12 + a22 * b22 + a23 * b32;
+    T[5] = a21 * b13 + a22 * b23 + a23 * b33;
+    T[6] = a31 * b11 + a32 * b21 + a33 * b31;
+    T[7] = a31 * b12 + a32 * b22 + a33 * b32;
+    T[8] = a31 * b13 + a32 * b23 + a33 * b33;
     return target;
   }
   /**
@@ -544,15 +559,22 @@ class Mat3 {
 
 
   transpose(target = new Mat3()) {
-    const Mt = target.elements;
     const M = this.elements;
+    const T = target.elements;
+    let tmp; //Set diagonals
 
-    for (let i = 0; i !== 3; i++) {
-      for (let j = 0; j !== 3; j++) {
-        Mt[3 * i + j] = M[3 * j + i];
-      }
-    }
-
+    T[0] = M[0];
+    T[4] = M[4];
+    T[8] = M[8];
+    tmp = M[1];
+    T[1] = M[3];
+    T[3] = tmp;
+    tmp = M[2];
+    T[2] = M[6];
+    T[6] = tmp;
+    tmp = M[5];
+    T[5] = M[7];
+    T[7] = tmp;
     return target;
   }
 
@@ -3541,6 +3563,31 @@ class Body extends EventTarget {
     this.updateBoundingRadius();
     this.aabbNeedsUpdate = true;
     shape.body = this;
+    return this;
+  }
+  /**
+   * Remove a shape from the body.
+   * @method removeShape
+   * @param {Shape} shape
+   * @return {Body} The body object, for chainability.
+   */
+
+
+  removeShape(shape) {
+    const index = this.shapes.indexOf(shape);
+
+    if (index === -1) {
+      console.warn('Shape does not belong to the body');
+      return this;
+    }
+
+    this.shapes.splice(index, 1);
+    this.shapeOffsets.splice(index, 1);
+    this.shapeOrientations.splice(index, 1);
+    this.updateMassProperties();
+    this.updateBoundingRadius();
+    this.aabbNeedsUpdate = true;
+    shape.body = null;
     return this;
   }
   /**
@@ -9800,7 +9847,8 @@ const COLLISION_TYPES = {
   heightfieldCylinder: Shape.types.HEIGHTFIELD | Shape.types.CYLINDER,
   particleCylinder: Shape.types.PARTICLE | Shape.types.CYLINDER,
   sphereTrimesh: Shape.types.SPHERE | Shape.types.TRIMESH,
-  planeTrimesh: Shape.types.PLANE | Shape.types.TRIMESH
+  planeTrimesh: Shape.types.PLANE | Shape.types.TRIMESH,
+  convexTrimesh: Shape.types.CONVEXPOLYHEDRON | Shape.types.TRIMESH
 };
 
 /**
@@ -11155,65 +11203,79 @@ class Narrowphase {
         this.createFrictionEquationsFromContact(r, this.frictionResult);
       }
     }
-  } // convexTrimesh(
-  //   si: ConvexPolyhedron, sj: Trimesh, xi: Vec3, xj: Vec3, qi: Quaternion, qj: Quaternion,
-  //   bi: Body, bj: Body, rsi?: Shape | null, rsj?: Shape | null,
-  //   faceListA?: number[] | null, faceListB?: number[] | null,
-  // ) {
-  //   const sepAxis = convexConvex_sepAxis;
-  //   if(xi.distanceTo(xj) > si.boundingSphereRadius + sj.boundingSphereRadius){
-  //       return;
-  //   }
-  //   // Construct a temp hull for each triangle
-  //   const hullB = new ConvexPolyhedron();
-  //   hullB.faces = [[0,1,2]];
-  //   const va = new Vec3();
-  //   const vb = new Vec3();
-  //   const vc = new Vec3();
-  //   hullB.vertices = [
-  //       va,
-  //       vb,
-  //       vc
-  //   ];
-  //   for (let i = 0; i < sj.indices.length / 3; i++) {
-  //       const triangleNormal = new Vec3();
-  //       sj.getNormal(i, triangleNormal);
-  //       hullB.faceNormals = [triangleNormal];
-  //       sj.getTriangleVertices(i, va, vb, vc);
-  //       let d = si.testSepAxis(triangleNormal, hullB, xi, qi, xj, qj);
-  //       if(!d){
-  //           triangleNormal.scale(-1, triangleNormal);
-  //           d = si.testSepAxis(triangleNormal, hullB, xi, qi, xj, qj);
-  //           if(!d){
-  //               continue;
-  //           }
-  //       }
-  //       const res: ConvexPolyhedronContactPoint[] = [];
-  //       const q = convexConvex_q;
-  //       si.clipAgainstHull(xi,qi,hullB,xj,qj,triangleNormal,-100,100,res);
-  //       for(let j = 0; j !== res.length; j++){
-  //           const r = this.createContactEquation(bi,bj,si,sj,rsi,rsj),
-  //               ri = r.ri,
-  //               rj = r.rj;
-  //           r.ni.copy(triangleNormal);
-  //           r.ni.negate(r.ni);
-  //           res[j].normal.negate(q);
-  //           q.mult(res[j].depth, q);
-  //           res[j].point.vadd(q, ri);
-  //           rj.copy(res[j].point);
-  //           // Contact points are in world coordinates. Transform back to relative
-  //           ri.vsub(xi,ri);
-  //           rj.vsub(xj,rj);
-  //           // Make relative to bodies
-  //           ri.vadd(xi, ri);
-  //           ri.vsub(bi.position, ri);
-  //           rj.vadd(xj, rj);
-  //           rj.vsub(bj.position, rj);
-  //           result.push(r);
-  //       }
-  //   }
-  // }
+  }
 
+  convexTrimesh(shapeCvP, shapeTri, xCvP, xTri, qCvP, qTri, bodyCvP, bodyTri, rshapeCvP, rshapeTri, justTest, faceListA, faceListB) {
+
+    if (xCvP.distanceTo(xTri) > shapeCvP.boundingSphereRadius + shapeTri.boundingSphereRadius) {
+      return;
+    } // Construct a temp hull for each triangle
+
+
+    const va = new Vec3();
+    const vb = new Vec3();
+    const vc = new Vec3();
+    const hullB = new ConvexPolyhedron({
+      vertices: [va, vb, vc],
+      faces: [[0, 1, 2]]
+    });
+
+    for (let i = 0; i < shapeTri.indices.length / 3; i++) {
+      const triangleNormal = new Vec3();
+      shapeTri.getNormal(i, triangleNormal);
+      hullB.faceNormals = [triangleNormal];
+      shapeTri.getTriangleVertices(i, va, vb, vc);
+      let depth = shapeCvP.testSepAxis(triangleNormal, hullB, xCvP, qCvP, xTri, qTri);
+
+      if (!depth) {
+        triangleNormal.scale(-1, triangleNormal);
+        depth = shapeCvP.testSepAxis(triangleNormal, hullB, xCvP, qCvP, xTri, qTri);
+
+        if (!depth) {
+          continue;
+        }
+      }
+
+      const res = [];
+      const q = convexConvex_q;
+      shapeCvP.clipAgainstHull(xCvP, qCvP, hullB, xTri, qTri, triangleNormal, -100, 100, res);
+      let numContacts = 0;
+
+      for (let j = 0; j !== res.length; j++) {
+        if (justTest) {
+          return true;
+        }
+
+        const r = this.createContactEquation(bodyCvP, bodyTri, shapeCvP, shapeTri, rshapeCvP, rshapeTri);
+        const ri = r.ri;
+        const rj = r.rj;
+        r.ni.copy(triangleNormal);
+        r.ni.negate(r.ni);
+        res[j].normal.negate(q);
+        q.scale(res[j].depth, q);
+        res[j].point.vadd(q, ri);
+        rj.copy(res[j].point); // Contact points are in world coordinates. Transform back to relative
+
+        ri.vsub(xCvP, ri);
+        rj.vsub(xTri, rj); // Make relative to bodies
+
+        ri.vadd(xCvP, ri);
+        ri.vsub(bodyCvP.position, ri);
+        rj.vadd(xTri, rj);
+        rj.vsub(bodyTri.position, rj);
+        this.result.push(r);
+        numContacts++;
+
+        if (!this.enableFrictionReduction) {
+          this.createFrictionEquationsFromContact(r, this.frictionResult);
+        }
+      }
+
+      if (this.enableFrictionReduction && numContacts) {
+        this.createFrictionFromAverage(numContacts);
+      }
+    }
+  }
 
 }
 const averageNormal = new Vec3();
@@ -11319,8 +11381,8 @@ const planeConvex_projected = new Vec3();
 Narrowphase.prototype[COLLISION_TYPES.planeConvex] = Narrowphase.prototype.planeConvex;
 const convexConvex_sepAxis = new Vec3();
 const convexConvex_q = new Vec3();
-Narrowphase.prototype[COLLISION_TYPES.convexConvex] = Narrowphase.prototype.convexConvex; // Narrowphase.prototype[COLLISION_TYPES.convexTrimesh] = Narrowphase.prototype.convexTrimesh
-
+Narrowphase.prototype[COLLISION_TYPES.convexConvex] = Narrowphase.prototype.convexConvex;
+Narrowphase.prototype[COLLISION_TYPES.convexTrimesh] = Narrowphase.prototype.convexTrimesh;
 const particlePlane_normal = new Vec3();
 const particlePlane_relpos = new Vec3();
 const particlePlane_projected = new Vec3();

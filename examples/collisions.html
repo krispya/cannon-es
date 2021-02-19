@@ -11,6 +11,31 @@
       import * as CANNON from '../dist/cannon-es.js'
       import { Demo } from './js/Demo.js'
 
+      function createTetra() {
+        const vertices = [
+          new CANNON.Vec3(0, 0, 0),
+          new CANNON.Vec3(2, 0, 0),
+          new CANNON.Vec3(0, 2, 0),
+          new CANNON.Vec3(0, 0, 2),
+        ]
+        const offset = -0.35
+        for (let i = 0; i < vertices.length; i++) {
+          const v = vertices[i]
+          v.x += offset
+          v.y += offset
+          v.z += offset
+        }
+        return new CANNON.ConvexPolyhedron({
+          vertices: vertices,
+          faces: [
+            [0, 3, 2], // -x
+            [0, 1, 3], // -y
+            [0, 2, 1], // -z
+            [1, 2, 3], // +xyz
+          ],
+        })
+      }
+
       /**
        * For debugging different kinds of pair collisions
        */
@@ -118,6 +143,34 @@
         // Sphere
         const body2 = new CANNON.Body({ mass: 5 })
         body2.addShape(sphereShape)
+        body2.position.set(5, 0, 0)
+        body2.velocity.set(-5, 0, 0)
+        body2.linearDamping = 0
+        world.addBody(body2)
+        demo.addVisual(body2)
+      })
+
+      demo.addScene('Convex / Trimesh', () => {
+        const world = setupWorld(demo)
+        
+        // Trimesh
+        const body1 = new CANNON.Body({ mass: 5 })
+        body1.addShape(CANNON.Trimesh.createTorus(2, 1.2, 16, 16))
+        body1.position.set(-5, 0, 0)
+        body1.velocity.set(5, 0, 0)
+        body1.linearDamping = 0
+        const quaternion1 = new CANNON.Quaternion()
+        quaternion1.setFromEuler(0, Math.PI * 0.25, 0)
+        const quaternion2 = new CANNON.Quaternion()
+        quaternion2.setFromEuler(0, 0, Math.PI * 0.15)
+        const quaternion = quaternion1.mult(quaternion2)
+        body1.quaternion.copy(quaternion)
+        world.addBody(body1)
+        demo.addVisual(body1)
+
+        // Convex
+        const body2 = new CANNON.Body({ mass: 5 })
+        body2.addShape(createTetra())
         body2.position.set(5, 0, 0)
         body2.velocity.set(-5, 0, 0)
         body2.linearDamping = 0
