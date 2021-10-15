@@ -58,7 +58,7 @@ If you pass a mass of 0 to a body, that body is automatically flagged as a stati
 
 ```js
 const groundBody = new CANNON.Body({
-  type: Body.STATIC,
+  type: CANNON.Body.STATIC,
   shape: new CANNON.Plane(),
 })
 groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0) // make it face up
@@ -86,7 +86,7 @@ world.addBody(sphereBody)
 
 // Create a static plane for the ground
 const groundBody = new CANNON.Body({
-  type: Body.STATIC, // can also be achieved by setting the mass to 0
+  type: CANNON.Body.STATIC, // can also be achieved by setting the mass to 0
   shape: new CANNON.Plane(),
 })
 groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0) // make it face up
