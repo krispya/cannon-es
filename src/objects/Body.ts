@@ -909,6 +909,8 @@ export class Body extends EventTarget {
   updateMassProperties(): void {
     const halfExtents = Body_updateMassProperties_halfExtents
 
+    console.log('Test!')
+
     this.invMass = this.mass > 0 ? 1.0 / this.mass : 0
     const I = this.inertia
     const fixed = this.fixedRotation
