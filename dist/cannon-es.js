@@ -640,7 +640,7 @@ class Vec3 {
   }
   /**
    * Normalize the vector. Note that this changes the values in the vector.
-    * @return Returns the norm of the vector
+     * @return Returns the norm of the vector
    */
 
 
@@ -3905,6 +3905,7 @@ class Body extends EventTarget {
 
   updateMassProperties() {
     const halfExtents = Body_updateMassProperties_halfExtents;
+    console.log('Test!');
     this.invMass = this.mass > 0 ? 1.0 / this.mass : 0;
     const I = this.inertia;
     const fixed = this.fixedRotation; // Approximate with AABB box
@@ -3986,6 +3987,10 @@ class Body extends EventTarget {
     this.aabbNeedsUpdate = true; // Update world inertia
 
     this.updateInertiaWorld();
+  }
+
+  speak() {
+    console.log('Hello!');
   }
 
 }
@@ -9757,7 +9762,7 @@ class Trimesh extends Shape {
         const n = this.vertices.length / 3,
             verts = this.vertices;
         const minx,miny,minz,maxx,maxy,maxz;
-         const v = tempWorldVertex;
+          const v = tempWorldVertex;
         for(let i=0; i<n; i++){
             this.getVertex(i, v);
             quat.vmult(v, v);
@@ -9767,12 +9772,12 @@ class Trimesh extends Shape {
             } else if(v.x > maxx || maxx===undefined){
                 maxx = v.x;
             }
-             if (v.y < miny || miny===undefined){
+              if (v.y < miny || miny===undefined){
                 miny = v.y;
             } else if(v.y > maxy || maxy===undefined){
                 maxy = v.y;
             }
-             if (v.z < minz || minz===undefined){
+              if (v.z < minz || minz===undefined){
                 minz = v.z;
             } else if(v.z > maxz || maxz===undefined){
                 maxz = v.z;

@@ -1105,6 +1105,7 @@ declare module "objects/Body" {
         updateMassProperties(): void;
         getVelocityAtWorldPoint(worldPoint: Vec3, result: Vec3): Vec3;
         integrate(dt: number, quatNormalize: boolean, quatNormalizeFast: boolean): void;
+        speak(): void;
     }
 }
 declare module "collision/ObjectCollisionMatrix" {
