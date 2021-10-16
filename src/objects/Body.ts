@@ -1004,6 +1004,10 @@ export class Body extends EventTarget {
     // Update world inertia
     this.updateInertiaWorld()
   }
+
+  speak(): void {
+    console.log('Hello!')
+  }
 }
 
 const tmpVec = new Vec3()
