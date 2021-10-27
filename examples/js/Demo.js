@@ -453,9 +453,9 @@ class Demo extends CANNON.EventTarget {
     if (this.settings.aabbs) {
       for (let i = 0; i < this.bodies.length; i++) {
         const body = this.bodies[i]
-        if (body.computeAABB) {
+        if (body.updateAABB) {
           if (body.aabbNeedsUpdate) {
-            body.computeAABB()
+            body.updateAABB()
           }
 
           // Todo: cap the infinite AABB to scene AABB, for now just dont render
