@@ -464,9 +464,11 @@ export class Body extends EventTarget {
     }
 
     this.velocity = new Vec3()
+    this.initVelocity = new Vec3()
 
     if (options.velocity) {
       this.velocity.copy(options.velocity)
+      this.initVelocity.copy(options.velocity)
     }
 
     this.initVelocity = new Vec3()
