@@ -149,7 +149,7 @@ export class Shape {
   /**
    * @todo use abstract for these kind of methods
    */
-  calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void {
+  calculateWorldAABB(pos: Vec3, quat: Quaternion, scale: Vec3, min: Vec3, max: Vec3): void {
     throw `calculateWorldAABB() not implemented for shape type ${this.type}`
   }
 }

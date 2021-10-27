@@ -336,6 +336,7 @@ export class Body extends EventTarget {
    */
   boundingRadius: number
   wlambda: Vec3
+
   /**
    * When true the body behaves like a trigger. It does not collide
    * with other bodies but collision events are still triggered.
@@ -731,6 +732,7 @@ export class Body extends EventTarget {
     const bodyQuat = this.quaternion
     const aabb = this.aabb
     const shapeAABB = updateAABB_shapeAABB
+    const scale = new Vec3(2, 2, 2)
 
     for (let i = 0; i !== N; i++) {
       const shape = shapes[i]
@@ -743,7 +745,7 @@ export class Body extends EventTarget {
       bodyQuat.mult(shapeOrientations[i], orientation)
 
       // Get shape AABB
-      shape.calculateWorldAABB(offset, orientation, shapeAABB.lowerBound, shapeAABB.upperBound)
+      shape.calculateWorldAABB(offset, orientation, scale, shapeAABB.lowerBound, shapeAABB.upperBound)
 
       if (i === 0) {
         aabb.copy(shapeAABB)
@@ -909,8 +911,6 @@ export class Body extends EventTarget {
   updateMassProperties(): void {
     const halfExtents = Body_updateMassProperties_halfExtents
 
-    console.log('Test!')
-
     this.invMass = this.mass > 0 ? 1.0 / this.mass : 0
     const I = this.inertia
     const fixed = this.fixedRotation
@@ -1008,7 +1008,7 @@ export class Body extends EventTarget {
   }
 
   speak(): void {
-    console.log('Hello!')
+    console.log('hello')
   }
 }
 

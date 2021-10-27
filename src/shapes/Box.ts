@@ -147,7 +147,7 @@ export class Box extends Shape {
   /**
    * calculateWorldAABB
    */
-  calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void {
+  calculateWorldAABB(pos: Vec3, quat: Quaternion, scale: Vec3, min: Vec3, max: Vec3): void {
     const e = this.halfExtents
     worldCornersTemp[0].set(e.x, e.y, e.z)
     worldCornersTemp[1].set(-e.x, e.y, e.z)

@@ -1958,7 +1958,7 @@ class Shape {
    */
 
 
-  calculateWorldAABB(pos, quat, min, max) {
+  calculateWorldAABB(pos, quat, scale, min, max) {
     throw `calculateWorldAABB() not implemented for shape type ${this.type}`;
   }
 
@@ -3054,7 +3054,7 @@ class Box extends Shape {
    */
 
 
-  calculateWorldAABB(pos, quat, min, max) {
+  calculateWorldAABB(pos, quat, scale, min, max) {
     const e = this.halfExtents;
     worldCornersTemp[0].set(e.x, e.y, e.z);
     worldCornersTemp[1].set(-e.x, e.y, e.z);
@@ -3744,6 +3744,7 @@ class Body extends EventTarget {
     const bodyQuat = this.quaternion;
     const aabb = this.aabb;
     const shapeAABB = updateAABB_shapeAABB;
+    const scale = new Vec3(2, 2, 2);
 
     for (let i = 0; i !== N; i++) {
       const shape = shapes[i]; // Get shape world position
@@ -3753,7 +3754,7 @@ class Body extends EventTarget {
 
       bodyQuat.mult(shapeOrientations[i], orientation); // Get shape AABB
 
-      shape.calculateWorldAABB(offset, orientation, shapeAABB.lowerBound, shapeAABB.upperBound);
+      shape.calculateWorldAABB(offset, orientation, scale, shapeAABB.lowerBound, shapeAABB.upperBound);
 
       if (i === 0) {
         aabb.copy(shapeAABB);
@@ -3909,7 +3910,6 @@ class Body extends EventTarget {
 
   updateMassProperties() {
     const halfExtents = Body_updateMassProperties_halfExtents;
-    console.log('Test!');
     this.invMass = this.mass > 0 ? 1.0 / this.mass : 0;
     const I = this.inertia;
     const fixed = this.fixedRotation; // Approximate with AABB box
@@ -3994,7 +3994,7 @@ class Body extends EventTarget {
   }
 
   speak() {
-    console.log('Hello!');
+    console.log('hello');
   }
 
 }

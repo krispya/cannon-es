@@ -185,7 +185,7 @@ declare module "shapes/Shape" {
         updateBoundingSphereRadius(): void;
         volume(): number;
         calculateLocalInertia(mass: number, target: Vec3): void;
-        calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void;
+        calculateWorldAABB(pos: Vec3, quat: Quaternion, scale: Vec3, min: Vec3, max: Vec3): void;
     }
 }
 declare module "collision/RaycastResult" {
@@ -287,7 +287,7 @@ declare module "shapes/Box" {
         volume(): number;
         updateBoundingSphereRadius(): void;
         forEachWorldCorner(pos: Vec3, quat: Quaternion, callback: (x: number, y: number, z: number) => void): void;
-        calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void;
+        calculateWorldAABB(pos: Vec3, quat: Quaternion, scale: Vec3, min: Vec3, max: Vec3): void;
     }
 }
 declare module "shapes/Plane" {
