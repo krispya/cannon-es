@@ -38,6 +38,6 @@ export class Particle extends Shape {
 
   updateScale(scale: Vec3): void {
     // Particles have no dimensions to scale
-    console.log('updateScale particle')
+    return
   }
 }

@@ -78,7 +78,8 @@ export class Plane extends Shape {
   }
 
   updateScale(scale: Vec3): void {
-    console.log('updateScale plane')
+    // The plane is inifinite so no scaling gets applied.
+    return
   }
 }
 
