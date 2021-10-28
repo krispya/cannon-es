@@ -30,9 +30,12 @@ export function shapeToGeometry(shape, { flatShading = true } = {}) {
     }
 
     case CANNON.Shape.types.CYLINDER: {
-      const scale = shape.body.scale
+      const scale = shape?.body?.scale
       let geometry = new THREE.CylinderGeometry(shape.radiusTop, shape.radiusBottom, shape.height, shape.numSegments)
-      geometry = geometry.scale(scale.x, scale.y, scale.z)
+
+      if (scale) {
+        geometry = geometry.scale(scale.x, scale.y, scale.z)
+      }
 
       return geometry
     }
