@@ -353,7 +353,7 @@ export class World extends EventTarget {
 
   /**
    * Add a rigid body to the simulation.
-   * @todo If the simulation has not yet started, why recrete and copy arrays for each body? Accumulate in dynamic arrays in this case.
+   * @todo If the simulation has not yet started, why recreate and copy arrays for each body? Accumulate in dynamic arrays in this case.
    * @todo Adding an array of bodies should be possible. This would save some loops too
    */
   addBody(body: Body): void {
