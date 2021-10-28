@@ -67,10 +67,61 @@
         body.position.set(0, size * 4, size)
 
         demo.addSetTimeout(() => {
+          // Can update scale with a new Vec3 but isn't recommended.
           body.updateScale(new CANNON.Vec3(1.2, 1.3, 0.9))
           demo.removeVisual(body)
           demo.addVisual(body)
         }, 1000)
+
+        world.addBody(body)
+        demo.addVisual(body)
+      })
+
+      demo.addScene('Convex', () => {
+        const world = setupWorld(demo)
+
+        function createTetra() {
+          const vertices = [
+            new CANNON.Vec3(0, 0, 0),
+            new CANNON.Vec3(2, 0, 0),
+            new CANNON.Vec3(0, 2, 0),
+            new CANNON.Vec3(0, 0, 2),
+          ]
+          const offset = -0.35
+          for (let i = 0; i < vertices.length; i++) {
+            const v = vertices[i]
+            v.x += offset
+            v.y += offset
+            v.z += offset
+          }
+          return new CANNON.ConvexPolyhedron({
+            vertices: vertices,
+            faces: [
+              [0, 3, 2], // -x
+              [0, 1, 3], // -y
+              [0, 2, 1], // -z
+              [1, 2, 3], // +xyz
+            ],
+          })
+        }
+
+        // ConvexPolyhedron tetra shape
+        const tetraShape = createTetra()
+        const body = new CANNON.Body({
+          mass: 30,
+          velocity: new CANNON.Vec3(1, 0, 0),
+          angularVelocity: new CANNON.Vec3(1, 3, 0),
+          scale: new CANNON.Vec3(1, 2, 4),
+        })
+        body.addShape(tetraShape)
+        body.position.set(0, 8, 2)
+
+        demo.addSetTimeout(() => {
+          body.scale.set(1.2, 1, 1)
+          body.updateScale()
+          demo.removeVisual(body)
+          demo.addVisual(body)
+        }, 500)
 
         world.addBody(body)
         demo.addVisual(body)

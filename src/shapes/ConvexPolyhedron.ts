@@ -31,6 +31,7 @@ export type ConvexPolyhedronContactPoint = {
 export class ConvexPolyhedron extends Shape {
   /** vertices */
   vertices: Vec3[]
+  initVertices: Vec3[]
   /**
    * Array of integer arrays, indicating which vertices each face consists of
    */
@@ -60,6 +61,7 @@ export class ConvexPolyhedron extends Shape {
     props: {
       /** An array of Vec3's */
       vertices?: Vec3[]
+      initVertices?: Vec3[]
       /** Array of integer arrays, describing which vertices that is included in each face. */
       faces?: number[][]
       /** normals */
@@ -70,11 +72,12 @@ export class ConvexPolyhedron extends Shape {
       boundingSphereRadius?: number
     } = {}
   ) {
-    const { vertices = [], faces = [], normals = [], axes, boundingSphereRadius } = props
+    const { vertices = [], initVertices = [], faces = [], normals = [], axes, boundingSphereRadius } = props
 
     super({ type: Shape.types.CONVEXPOLYHEDRON })
 
     this.vertices = vertices
+    this.initVertices = [...this.vertices]
     this.faces = faces
     this.faceNormals = normals
 
@@ -866,7 +869,13 @@ export class ConvexPolyhedron extends Shape {
   }
 
   updateScale(scale: Vec3): void {
-    console.log('updateScale convex polyhedron')
+    this.initVertices.forEach((vert, i) => {
+      this.vertices[i] = vert.vmul(scale)
+    })
+
+    this.computeNormals()
+    this.updateBoundingSphereRadius()
+    this.computeEdges()
   }
 }
 

@@ -640,7 +640,7 @@ class Vec3 {
   }
   /**
    * Normalize the vector. Note that this changes the values in the vector.
-     * @return Returns the norm of the vector
+    * @return Returns the norm of the vector
    */
 
 
@@ -2108,6 +2108,7 @@ class ConvexPolyhedron extends Shape {
   constructor(props = {}) {
     const {
       vertices = [],
+      initVertices = [],
       faces = [],
       normals = [],
       axes,
@@ -2117,6 +2118,7 @@ class ConvexPolyhedron extends Shape {
       type: Shape.types.CONVEXPOLYHEDRON
     });
     this.vertices = void 0;
+    this.initVertices = void 0;
     this.faces = void 0;
     this.faceNormals = void 0;
     this.worldVertices = void 0;
@@ -2126,6 +2128,7 @@ class ConvexPolyhedron extends Shape {
     this.uniqueAxes = void 0;
     this.uniqueEdges = void 0;
     this.vertices = vertices;
+    this.initVertices = [...this.vertices];
     this.faces = faces;
     this.faceNormals = normals;
 
@@ -2916,7 +2919,12 @@ class ConvexPolyhedron extends Shape {
   }
 
   updateScale(scale) {
-    console.log('updateScale convex polyhedron');
+    this.initVertices.forEach((vert, i) => {
+      this.vertices[i] = vert.vmul(scale);
+    });
+    this.computeNormals();
+    this.updateBoundingSphereRadius();
+    this.computeEdges();
   }
 
 }
@@ -8547,7 +8555,7 @@ class Particle extends Shape {
 
   updateScale(scale) {
     // Particles have no dimensions to scale
-    console.log('updateScale particle');
+    return;
   }
 
 }
@@ -8629,7 +8637,8 @@ class Plane extends Shape {
   }
 
   updateScale(scale) {
-    console.log('updateScale plane');
+    // The plane is inifinite so no scaling gets applied.
+    return;
   }
 
 }
@@ -9187,6 +9196,7 @@ class Heightfield extends Shape {
   }
 
   updateScale(scale) {
+    // setHeightsFromImage uses a scale value already
     console.log('updateScale heightfield');
   }
 
@@ -9823,7 +9833,7 @@ class Trimesh extends Shape {
         const n = this.vertices.length / 3,
             verts = this.vertices;
         const minx,miny,minz,maxx,maxy,maxz;
-          const v = tempWorldVertex;
+         const v = tempWorldVertex;
         for(let i=0; i<n; i++){
             this.getVertex(i, v);
             quat.vmult(v, v);
@@ -9833,12 +9843,12 @@ class Trimesh extends Shape {
             } else if(v.x > maxx || maxx===undefined){
                 maxx = v.x;
             }
-              if (v.y < miny || miny===undefined){
+             if (v.y < miny || miny===undefined){
                 miny = v.y;
             } else if(v.y > maxy || maxy===undefined){
                 maxy = v.y;
             }
-              if (v.z < minz || minz===undefined){
+             if (v.z < minz || minz===undefined){
                 minz = v.z;
             } else if(v.z > maxz || maxz===undefined){
                 maxz = v.z;

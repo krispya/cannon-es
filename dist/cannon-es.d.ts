@@ -236,6 +236,7 @@ declare module "shapes/ConvexPolyhedron" {
     };
     export class ConvexPolyhedron extends Shape {
         vertices: Vec3[];
+        initVertices: Vec3[];
         faces: number[][];
         faceNormals: Vec3[];
         worldVertices: Vec3[];
@@ -246,6 +247,7 @@ declare module "shapes/ConvexPolyhedron" {
         uniqueEdges: Vec3[];
         constructor(props?: {
             vertices?: Vec3[];
+            initVertices?: Vec3[];
             faces?: number[][];
             normals?: Vec3[];
             axes?: Vec3[];
