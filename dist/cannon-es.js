@@ -640,7 +640,7 @@ class Vec3 {
   }
   /**
    * Normalize the vector. Note that this changes the values in the vector.
-     * @return Returns the norm of the vector
+    * @return Returns the norm of the vector
    */
 
 
@@ -1954,8 +1954,12 @@ class Shape {
    */
 
 
-  calculateWorldAABB(pos, quat, scale, min, max) {
+  calculateWorldAABB(pos, quat, min, max) {
     throw `calculateWorldAABB() not implemented for shape type ${this.type}`;
+  }
+
+  updateScale(scale) {
+    throw `updateScale() not implemented for shape type ${this.type}`;
   }
 
 }
@@ -2939,8 +2943,11 @@ class Box extends Shape {
       type: Shape.types.BOX
     });
     this.halfExtents = void 0;
+    this.initHalfExtents = void 0;
     this.convexPolyhedronRepresentation = void 0;
     this.halfExtents = halfExtents;
+    this.initHalfExtents = new Vec3();
+    this.initHalfExtents.copy(this.halfExtents);
     this.convexPolyhedronRepresentation = null;
     this.updateConvexPolyhedronRepresentation();
     this.updateBoundingSphereRadius();
@@ -3050,7 +3057,7 @@ class Box extends Shape {
    */
 
 
-  calculateWorldAABB(pos, quat, scale, min, max) {
+  calculateWorldAABB(pos, quat, min, max) {
     const e = this.halfExtents;
     worldCornersTemp[0].set(e.x, e.y, e.z);
     worldCornersTemp[1].set(-e.x, e.y, e.z);
@@ -3121,6 +3128,13 @@ class Box extends Shape {
     //     }
     // });
 
+  }
+
+  updateScale(scale) {
+    const scaledHalfExtents = this.initHalfExtents.vmul(scale);
+    this.halfExtents.copy(scaledHalfExtents);
+    this.updateConvexPolyhedronRepresentation();
+    this.updateBoundingSphereRadius();
   }
 
 }
@@ -3445,6 +3459,7 @@ class Body extends EventTarget {
     this.boundingRadius = void 0;
     this.wlambda = void 0;
     this.isTrigger = void 0;
+    this.scale = void 0;
     this.id = Body.idCounter++;
     this.index = -1;
     this.world = null;
@@ -3467,12 +3482,19 @@ class Body extends EventTarget {
     }
 
     this.velocity = new Vec3();
+    this.initVelocity = new Vec3();
 
     if (options.velocity) {
       this.velocity.copy(options.velocity);
+      this.initVelocity.copy(options.velocity);
     }
 
-    this.initVelocity = new Vec3();
+    this.scale = new Vec3(1, 1, 1);
+
+    if (options.scale) {
+      this.scale.copy(options.scale);
+    }
+
     this.force = new Vec3();
     const mass = typeof options.mass === 'number' ? options.mass : 0;
     this.mass = mass;
@@ -3505,12 +3527,13 @@ class Body extends EventTarget {
     }
 
     this.angularVelocity = new Vec3();
+    this.initAngularVelocity = new Vec3();
 
     if (options.angularVelocity) {
       this.angularVelocity.copy(options.angularVelocity);
+      this.initAngularVelocity.copy(options.angularVelocity);
     }
 
-    this.initAngularVelocity = new Vec3();
     this.shapes = [];
     this.shapeOffsets = [];
     this.shapeOrientations = [];
@@ -3676,6 +3699,7 @@ class Body extends EventTarget {
     this.updateBoundingRadius();
     this.aabbNeedsUpdate = true;
     shape.body = this;
+    shape.updateScale(this.scale);
     return this;
   }
   /**
@@ -3740,7 +3764,6 @@ class Body extends EventTarget {
     const bodyQuat = this.quaternion;
     const aabb = this.aabb;
     const shapeAABB = updateAABB_shapeAABB;
-    const scale = new Vec3(2, 2, 2);
 
     for (let i = 0; i !== N; i++) {
       const shape = shapes[i]; // Get shape world position
@@ -3750,7 +3773,7 @@ class Body extends EventTarget {
 
       bodyQuat.mult(shapeOrientations[i], orientation); // Get shape AABB
 
-      shape.calculateWorldAABB(offset, orientation, scale, shapeAABB.lowerBound, shapeAABB.upperBound);
+      shape.calculateWorldAABB(offset, orientation, shapeAABB.lowerBound, shapeAABB.upperBound);
 
       if (i === 0) {
         aabb.copy(shapeAABB);
@@ -3989,8 +4012,15 @@ class Body extends EventTarget {
     this.updateInertiaWorld();
   }
 
-  speak() {
-    console.log('hello');
+  updateScale(scale) {
+    this.scale.copy(scale);
+    const shapes = this.shapes;
+    const N = shapes.length;
+
+    for (let i = 0; i !== N; i++) {
+      const shape = shapes[i];
+      shape.updateScale(scale);
+    }
   }
 
 }
@@ -7899,12 +7929,14 @@ class Sphere extends Shape {
       type: Shape.types.SPHERE
     });
     this.radius = void 0;
+    this.initRadius = void 0;
     this.radius = radius !== undefined ? radius : 1.0;
 
     if (this.radius < 0) {
       throw new Error('The sphere radius cannot be negative.');
     }
 
+    this.initRadius = this.radius;
     this.updateBoundingSphereRadius();
   }
   /** calculateLocalInertia */
@@ -7937,6 +7969,11 @@ class Sphere extends Shape {
       min[ax] = pos[ax] - r;
       max[ax] = pos[ax] + r;
     }
+  }
+
+  updateScale(scale) {
+    this.radius = this.initRadius * scale.x;
+    this.updateBoundingSphereRadius();
   }
 
 }
@@ -8573,6 +8610,10 @@ class Plane extends Shape {
 
   updateBoundingSphereRadius() {
     this.boundingSphereRadius = Number.MAX_VALUE;
+  }
+
+  updateScale(scale) {
+    console.log('updateScale plane');
   }
 
 }
@@ -9762,7 +9803,7 @@ class Trimesh extends Shape {
         const n = this.vertices.length / 3,
             verts = this.vertices;
         const minx,miny,minz,maxx,maxy,maxz;
-          const v = tempWorldVertex;
+         const v = tempWorldVertex;
         for(let i=0; i<n; i++){
             this.getVertex(i, v);
             quat.vmult(v, v);
@@ -9772,12 +9813,12 @@ class Trimesh extends Shape {
             } else if(v.x > maxx || maxx===undefined){
                 maxx = v.x;
             }
-              if (v.y < miny || miny===undefined){
+             if (v.y < miny || miny===undefined){
                 miny = v.y;
             } else if(v.y > maxy || maxy===undefined){
                 maxy = v.y;
             }
-              if (v.z < minz || minz===undefined){
+             if (v.z < minz || minz===undefined){
                 minz = v.z;
             } else if(v.z > maxz || maxz===undefined){
                 maxz = v.z;
@@ -12467,7 +12508,7 @@ class World extends EventTarget {
   }
   /**
    * Add a rigid body to the simulation.
-   * @todo If the simulation has not yet started, why recrete and copy arrays for each body? Accumulate in dynamic arrays in this case.
+   * @todo If the simulation has not yet started, why recreate and copy arrays for each body? Accumulate in dynamic arrays in this case.
    * @todo Adding an array of bodies should be possible. This would save some loops too
    */
 
