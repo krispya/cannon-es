@@ -507,12 +507,12 @@ export class Body extends EventTarget {
     }
 
     this.angularVelocity = new Vec3()
+    this.initAngularVelocity = new Vec3()
 
     if (options.angularVelocity) {
       this.angularVelocity.copy(options.angularVelocity)
+      this.initAngularVelocity.copy(options.angularVelocity)
     }
-
-    this.initAngularVelocity = new Vec3()
 
     this.shapes = []
     this.shapeOffsets = []
