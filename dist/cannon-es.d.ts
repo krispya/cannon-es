@@ -272,6 +272,7 @@ declare module "shapes/ConvexPolyhedron" {
         transformAllPoints(offset: Vec3, quat: Quaternion): void;
         pointIsInside(p: Vec3): 1 | -1 | false;
         static project(shape: ConvexPolyhedron, axis: Vec3, pos: Vec3, quat: Quaternion, result: number[]): void;
+        updateScale(scale: Vec3): void;
     }
 }
 declare module "shapes/Box" {
@@ -363,6 +364,7 @@ declare module "shapes/Heightfield" {
         calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void;
         updateBoundingSphereRadius(): void;
         setHeightsFromImage(image: HTMLImageElement, scale: Vec3): void;
+        updateScale(scale: Vec3): void;
     }
 }
 declare module "utils/Octree" {
@@ -427,6 +429,7 @@ declare module "shapes/Trimesh" {
         calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void;
         volume(): number;
         static createTorus(radius?: number, tube?: number, radialSegments?: number, tubularSegments?: number, arc?: number): Trimesh;
+        updateScale(scale: Vec3): void;
     }
 }
 declare module "math/JacobianElement" {
@@ -578,16 +581,19 @@ declare module "shapes/Particle" {
         volume(): number;
         updateBoundingSphereRadius(): void;
         calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void;
+        updateScale(scale: Vec3): void;
     }
 }
 declare module "shapes/Cylinder" {
     import { ConvexPolyhedron } from "shapes/ConvexPolyhedron";
+    import { Vec3 } from "math/Vec3";
     export class Cylinder extends ConvexPolyhedron {
         radiusTop: number;
         radiusBottom: number;
         height: number;
         numSegments: number;
         constructor(radiusTop?: number, radiusBottom?: number, height?: number, numSegments?: number);
+        updateScale(scale: Vec3): void;
     }
 }
 declare module "material/ContactMaterial" {

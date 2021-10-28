@@ -95,4 +95,8 @@ export class Cylinder extends ConvexPolyhedron {
     this.height = height
     this.numSegments = numSegments
   }
+
+  updateScale(scale: Vec3): void {
+    console.log('updateScale cylinder')
+  }
 }

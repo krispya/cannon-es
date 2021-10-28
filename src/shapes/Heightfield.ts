@@ -584,6 +584,11 @@ export class Heightfield extends Shape {
     this.updateMinValue()
     this.update()
   }
+
+  updateScale(scale: Vec3): void {
+    // setHeightsFromImage uses a scale value already
+    console.log('updateScale heightfield')
+  }
 }
 
 const getHeightAt_idx: number[] = []

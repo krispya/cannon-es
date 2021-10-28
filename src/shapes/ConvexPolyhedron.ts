@@ -864,6 +864,10 @@ export class ConvexPolyhedron extends Shape {
     result[0] = max
     result[1] = min
   }
+
+  updateScale(scale: Vec3): void {
+    console.log('updateScale convex polyhedron')
+  }
 }
 
 const maxminA: number[] = []

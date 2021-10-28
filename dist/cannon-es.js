@@ -2915,6 +2915,10 @@ class ConvexPolyhedron extends Shape {
     result[1] = min;
   }
 
+  updateScale(scale) {
+    console.log('updateScale convex polyhedron');
+  }
+
 }
 const maxminA = [];
 const maxminB = [];
@@ -8498,6 +8502,10 @@ class Cylinder extends ConvexPolyhedron {
     this.numSegments = numSegments;
   }
 
+  updateScale(scale) {
+    console.log('updateScale cylinder');
+  }
+
 }
 
 /**
@@ -8535,6 +8543,11 @@ class Particle extends Shape {
     // Get each axis max
     min.copy(pos);
     max.copy(pos);
+  }
+
+  updateScale(scale) {
+    // Particles have no dimensions to scale
+    console.log('updateScale particle');
   }
 
 }
@@ -9171,6 +9184,10 @@ class Heightfield extends Shape {
     this.updateMaxValue();
     this.updateMinValue();
     this.update();
+  }
+
+  updateScale(scale) {
+    console.log('updateScale heightfield');
   }
 
 }
@@ -9879,6 +9896,11 @@ class Trimesh extends Shape {
     }
 
     return new Trimesh(vertices, indices);
+  }
+
+  updateScale(scale) {
+    // Has a local scale and setScale method already
+    console.log('updateScale trimesh');
   }
 
 }

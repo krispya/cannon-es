@@ -454,6 +454,11 @@ export class Trimesh extends Shape {
 
     return new Trimesh(vertices, indices)
   }
+
+  updateScale(scale: Vec3): void {
+    // Has a local scale and setScale method already
+    console.log('updateScale trimesh')
+  }
 }
 
 const computeNormals_n = new Vec3()

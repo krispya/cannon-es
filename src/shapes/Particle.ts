@@ -35,4 +35,9 @@ export class Particle extends Shape {
     min.copy(pos)
     max.copy(pos)
   }
+
+  updateScale(scale: Vec3): void {
+    // Particles have no dimensions to scale
+    console.log('updateScale particle')
+  }
 }
