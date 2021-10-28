@@ -588,14 +588,12 @@ declare module "shapes/Particle" {
 }
 declare module "shapes/Cylinder" {
     import { ConvexPolyhedron } from "shapes/ConvexPolyhedron";
-    import { Vec3 } from "math/Vec3";
     export class Cylinder extends ConvexPolyhedron {
         radiusTop: number;
         radiusBottom: number;
         height: number;
         numSegments: number;
         constructor(radiusTop?: number, radiusBottom?: number, height?: number, numSegments?: number);
-        updateScale(scale: Vec3): void;
     }
 }
 declare module "material/ContactMaterial" {

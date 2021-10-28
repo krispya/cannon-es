@@ -29,10 +29,11 @@ export function shapeToGeometry(shape, { flatShading = true } = {}) {
       return new THREE.BoxGeometry(shape.halfExtents.x * 2, shape.halfExtents.y * 2, shape.halfExtents.z * 2)
     }
 
-    case CANNON.Shape.types.CYLINDER: {
-      return new THREE.CylinderGeometry(shape.radiusTop, shape.radiusBottom, shape.height, shape.numSegments)
-    }
+    // case CANNON.Shape.types.CYLINDER: {
+    //   return new THREE.CylinderGeometry(shape.radiusTop, shape.radiusBottom, shape.height, shape.numSegments)
+    // }
 
+    case CANNON.Shape.types.CYLINDER:
     case CANNON.Shape.types.CONVEXPOLYHEDRON: {
       const geometry = new THREE.Geometry()
 

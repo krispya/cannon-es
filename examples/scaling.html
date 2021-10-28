@@ -127,6 +127,42 @@
         demo.addVisual(body)
       })
 
+      demo.addScene('Cylinder', () => {
+        const world = setupWorld(demo)
+
+        const height = 2
+        const radius = 0.5
+        const detail = 20
+
+        const cylinderShape = new CANNON.Cylinder(radius, radius, height, detail)
+        const body = new CANNON.Body({
+          mass: 30,
+          velocity: new CANNON.Vec3(1, 0, 0),
+          angularVelocity: new CANNON.Vec3(1, 3, 0),
+          scale: new CANNON.Vec3(4, 4, 4),
+        })
+
+        body.addShape(cylinderShape)
+        body.position.set(0, height * 4, 2)
+
+        demo.addSetTimeout(() => {
+          body.scale.set(1.2, 1, 3)
+          body.updateScale()
+          demo.removeVisual(body)
+          demo.addVisual(body)
+        }, 500)
+
+        demo.addSetTimeout(() => {
+          body.scale.set(1.2, 1.2, 0.8)
+          body.updateScale()
+          demo.removeVisual(body)
+          demo.addVisual(body)
+        }, 2000)
+
+        world.addBody(body)
+        demo.addVisual(body)
+      })
+
       demo.start()
 
       function setupWorld(demo) {
