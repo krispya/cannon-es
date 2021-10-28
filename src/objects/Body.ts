@@ -1020,14 +1020,16 @@ export class Body extends EventTarget {
   }
 
   updateScale(scale: Vec3): void {
-    this.scale.copy(scale)
+    if (scale) {
+      this.scale.copy(scale)
+    }
 
     const shapes = this.shapes
     const N = shapes.length
 
     for (let i = 0; i !== N; i++) {
       const shape = shapes[i]
-      shape.updateScale(scale)
+      shape.updateScale(this.scale)
     }
   }
 }

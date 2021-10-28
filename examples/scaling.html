@@ -35,14 +35,16 @@
         demo.addVisual(body)
 
         setTimeout(() => {
-          body.updateScale(new CANNON.Vec3(0.6, 1, 1))
+          body.scale.set(0.6, 1, 1)
+          body.updateScale()
           demo.removeVisual(body)
           demo.addVisual(body)
         }, 400)
 
         setTimeout(() => {
           body.position.set(0, 2 * 2, size)
-          body.updateScale(new CANNON.Vec3(2, 1, 1))
+          body.scale.set(2, 1, 1)
+          body.updateScale()
           demo.removeVisual(body)
           demo.addVisual(body)
         }, 1000)
