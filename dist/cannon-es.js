@@ -2919,12 +2919,9 @@ class ConvexPolyhedron extends Shape {
   }
 
   updateScale(scale) {
-    console.log('initVertices: ', this.initVertices);
-    console.log('preVerts: ', this.vertices);
     this.initVertices.forEach((vert, i) => {
       this.vertices[i] = vert.vmul(scale);
     });
-    console.log('postVerts: ', this.vertices);
     this.computeNormals();
     this.updateBoundingSphereRadius();
     this.computeEdges();
@@ -8497,7 +8494,6 @@ class Cylinder extends ConvexPolyhedron {
     }
 
     faces.push(temp);
-    console.log('Built cylinder faces');
     super({
       vertices,
       faces,
