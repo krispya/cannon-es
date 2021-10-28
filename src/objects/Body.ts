@@ -344,6 +344,8 @@ export class Body extends EventTarget {
    */
   isTrigger: boolean
 
+  scale: Vec3
+
   constructor(
     options: {
       /**
@@ -438,6 +440,8 @@ export class Body extends EventTarget {
        * @default false
        */
       isTrigger?: boolean
+
+      scale?: Vec3
     } = {}
   ) {
     super()
@@ -472,7 +476,12 @@ export class Body extends EventTarget {
       this.initVelocity.copy(options.velocity)
     }
 
-    this.initVelocity = new Vec3()
+    this.scale = new Vec3(1, 1, 1)
+
+    if (options.scale) {
+      this.scale.copy(options.scale)
+    }
+
     this.force = new Vec3()
     const mass = typeof options.mass === 'number' ? options.mass : 0
     this.mass = mass
@@ -671,6 +680,8 @@ export class Body extends EventTarget {
 
     shape.body = this
 
+    shape.updateScale(this.scale)
+
     return this
   }
 
@@ -734,7 +745,6 @@ export class Body extends EventTarget {
     const bodyQuat = this.quaternion
     const aabb = this.aabb
     const shapeAABB = updateAABB_shapeAABB
-    const scale = new Vec3(2, 2, 2)
 
     for (let i = 0; i !== N; i++) {
       const shape = shapes[i]
@@ -747,7 +757,7 @@ export class Body extends EventTarget {
       bodyQuat.mult(shapeOrientations[i], orientation)
 
       // Get shape AABB
-      shape.calculateWorldAABB(offset, orientation, scale, shapeAABB.lowerBound, shapeAABB.upperBound)
+      shape.calculateWorldAABB(offset, orientation, shapeAABB.lowerBound, shapeAABB.upperBound)
 
       if (i === 0) {
         aabb.copy(shapeAABB)
@@ -1009,8 +1019,16 @@ export class Body extends EventTarget {
     this.updateInertiaWorld()
   }
 
-  speak(): void {
-    console.log('hello')
+  updateScale(scale: Vec3): void {
+    this.scale.copy(scale)
+
+    const shapes = this.shapes
+    const N = shapes.length
+
+    for (let i = 0; i !== N; i++) {
+      const shape = shapes[i]
+      shape.updateScale(scale)
+    }
   }
 }
 

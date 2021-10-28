@@ -76,6 +76,10 @@ export class Plane extends Shape {
   updateBoundingSphereRadius(): void {
     this.boundingSphereRadius = Number.MAX_VALUE
   }
+
+  updateScale(scale: Vec3): void {
+    console.log('updateScale plane')
+  }
 }
 
 const tempNormal = new Vec3()
