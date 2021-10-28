@@ -14,6 +14,7 @@ class Demo extends CANNON.EventTarget {
   sceneFolder
   scenes = []
   listeners = {}
+  timeouts = []
 
   // array used to keep in sync the visuals with the bodies
   // they will have always the same length
@@ -498,6 +499,12 @@ class Demo extends CANNON.EventTarget {
       })
     })
     this.listeners = {}
+
+    // clear all timeouts
+    this.timeouts.forEach((timeout) => {
+      clearTimeout(timeout)
+    })
+    this.timeouts = []
 
     // clear any previous logs
     console.clear()
@@ -992,6 +999,11 @@ class Demo extends CANNON.EventTarget {
     }
 
     super.addEventListener(event, callback)
+  }
+
+  addSetTimeout(callback, delay) {
+    const timeout = setTimeout(callback, delay)
+    this.timeouts.push(timeout)
   }
 }
 
