@@ -336,12 +336,15 @@ export class Body extends EventTarget {
    */
   boundingRadius: number
   wlambda: Vec3
+
   /**
    * When true the body behaves like a trigger. It does not collide
    * with other bodies but collision events are still triggered.
    * @default false
    */
   isTrigger: boolean
+
+  scale: Vec3
 
   constructor(
     options: {
@@ -437,6 +440,8 @@ export class Body extends EventTarget {
        * @default false
        */
       isTrigger?: boolean
+
+      scale?: Vec3
     } = {}
   ) {
     super()
@@ -471,7 +476,12 @@ export class Body extends EventTarget {
       this.initVelocity.copy(options.velocity)
     }
 
-    this.initVelocity = new Vec3()
+    this.scale = new Vec3(1, 1, 1)
+
+    if (options.scale) {
+      this.scale.copy(options.scale)
+    }
+
     this.force = new Vec3()
     const mass = typeof options.mass === 'number' ? options.mass : 0
     this.mass = mass
@@ -669,6 +679,8 @@ export class Body extends EventTarget {
     this.aabbNeedsUpdate = true
 
     shape.body = this
+
+    shape.updateScale(this.scale)
 
     return this
   }
@@ -1005,6 +1017,18 @@ export class Body extends EventTarget {
 
     // Update world inertia
     this.updateInertiaWorld()
+  }
+
+  updateScale(scale: Vec3): void {
+    this.scale.copy(scale)
+
+    const shapes = this.shapes
+    const N = shapes.length
+
+    for (let i = 0; i !== N; i++) {
+      const shape = shapes[i]
+      shape.updateScale(scale)
+    }
   }
 }
 

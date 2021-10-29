@@ -186,6 +186,7 @@ declare module "shapes/Shape" {
         volume(): number;
         calculateLocalInertia(mass: number, target: Vec3): void;
         calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void;
+        updateScale(scale: Vec3): void;
     }
 }
 declare module "collision/RaycastResult" {
@@ -215,11 +216,13 @@ declare module "shapes/Sphere" {
     import type { Quaternion } from "math/Quaternion";
     export class Sphere extends Shape {
         radius: number;
+        initRadius: number;
         constructor(radius: number);
         calculateLocalInertia(mass: number, target?: Vec3): Vec3;
         volume(): number;
         updateBoundingSphereRadius(): void;
         calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void;
+        updateScale(scale: Vec3): void;
     }
 }
 declare module "shapes/ConvexPolyhedron" {
@@ -278,6 +281,7 @@ declare module "shapes/Box" {
     import type { Quaternion } from "math/Quaternion";
     export class Box extends Shape {
         halfExtents: Vec3;
+        initHalfExtents: Vec3;
         convexPolyhedronRepresentation: ConvexPolyhedron;
         constructor(halfExtents: Vec3);
         updateConvexPolyhedronRepresentation(): void;
@@ -288,6 +292,7 @@ declare module "shapes/Box" {
         updateBoundingSphereRadius(): void;
         forEachWorldCorner(pos: Vec3, quat: Quaternion, callback: (x: number, y: number, z: number) => void): void;
         calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void;
+        updateScale(scale: Vec3): void;
     }
 }
 declare module "shapes/Plane" {
@@ -304,6 +309,7 @@ declare module "shapes/Plane" {
         volume(): number;
         calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void;
         updateBoundingSphereRadius(): void;
+        updateScale(scale: Vec3): void;
     }
 }
 declare module "utils/Utils" {
@@ -1062,6 +1068,7 @@ declare module "objects/Body" {
         boundingRadius: number;
         wlambda: Vec3;
         isTrigger: boolean;
+        scale: Vec3;
         constructor(options?: {
             collisionFilterGroup?: number;
             collisionFilterMask?: number;
@@ -1083,6 +1090,7 @@ declare module "objects/Body" {
             angularFactor?: Vec3;
             shape?: Shape;
             isTrigger?: boolean;
+            scale?: Vec3;
         });
         wakeUp(): void;
         sleep(): void;
@@ -1105,6 +1113,7 @@ declare module "objects/Body" {
         updateMassProperties(): void;
         getVelocityAtWorldPoint(worldPoint: Vec3, result: Vec3): Vec3;
         integrate(dt: number, quatNormalize: boolean, quatNormalizeFast: boolean): void;
+        updateScale(scale: Vec3): void;
     }
 }
 declare module "collision/ObjectCollisionMatrix" {

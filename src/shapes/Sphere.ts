@@ -16,6 +16,8 @@ export class Sphere extends Shape {
    */
   radius: number
 
+  initRadius: number
+
   /**
    *
    * @param radius The radius of the sphere, a non-negative number.
@@ -29,6 +31,7 @@ export class Sphere extends Shape {
       throw new Error('The sphere radius cannot be negative.')
     }
 
+    this.initRadius = this.radius
     this.updateBoundingSphereRadius()
   }
 
@@ -58,5 +61,10 @@ export class Sphere extends Shape {
       min[ax] = pos[ax] - r
       max[ax] = pos[ax] + r
     }
+  }
+
+  updateScale(scale: Vec3): void {
+    this.radius = this.initRadius * scale.x
+    this.updateBoundingSphereRadius()
   }
 }

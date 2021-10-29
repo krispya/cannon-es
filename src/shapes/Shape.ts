@@ -152,4 +152,8 @@ export class Shape {
   calculateWorldAABB(pos: Vec3, quat: Quaternion, min: Vec3, max: Vec3): void {
     throw `calculateWorldAABB() not implemented for shape type ${this.type}`
   }
+
+  updateScale(scale: Vec3): void {
+    throw `updateScale() not implemented for shape type ${this.type}`
+  }
 }

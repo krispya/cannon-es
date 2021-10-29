@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>cannon.js - my test</title>
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  </head>
+  <body>
+    <script type="module">
+      import * as CANNON from '../dist/cannon-es.js'
+      import { Demo } from './js/Demo.js'
+
+      /**
+       * Just a simple body on a plane.
+       */
+
+      const demo = new Demo()
+
+      demo.addScene('Sphere', () => {
+        const world = setupWorld(demo)
+
+        const size = 2
+
+        const sphereShape = new CANNON.Sphere(size)
+
+        const body = new CANNON.Body({
+          mass: 30,
+          velocity: new CANNON.Vec3(1, 0, 0),
+          angularVelocity: new CANNON.Vec3(1, 3, 0),
+        })
+        body.addShape(sphereShape)
+        body.position.set(0, size * 2, size)
+        world.addBody(body)
+        demo.addVisual(body)
+
+        setTimeout(() => {
+          body.updateScale(new CANNON.Vec3(0.6, 1, 1))
+          demo.removeVisual(body)
+          demo.addVisual(body)
+        }, 400)
+
+        setTimeout(() => {
+          body.position.set(0, 2 * 2, size)
+          body.updateScale(new CANNON.Vec3(2, 1, 1))
+          demo.removeVisual(body)
+          demo.addVisual(body)
+        }, 1000)
+      })
+
+      demo.addScene('Box', () => {
+        const world = setupWorld(demo)
+
+        const size = 2
+
+        const boxShape = new CANNON.Box(new CANNON.Vec3(size, size, size))
+        const body = new CANNON.Body({
+          mass: 30,
+          velocity: new CANNON.Vec3(1, 0, 0),
+          angularVelocity: new CANNON.Vec3(1, 3, 0),
+          scale: new CANNON.Vec3(1, 2, 2),
+        })
+
+        body.addShape(boxShape)
+        body.position.set(0, size * 4, size)
+
+        setTimeout(() => {
+          body.updateScale(new CANNON.Vec3(1.2, 1.3, 0.9))
+          demo.removeVisual(body)
+          demo.addVisual(body)
+        }, 1000)
+
+        world.addBody(body)
+        demo.addVisual(body)
+      })
+
+      demo.start()
+
+      function setupWorld(demo) {
+        const world = demo.getWorld()
+        world.gravity.set(0, -10, 0)
+
+        // Tweak contact properties.
+        // Contact stiffness - use to make softer/harder contacts
+        world.defaultContactMaterial.contactEquationStiffness = 1e7
+
+        // Stabilization time in number of timesteps
+        world.defaultContactMaterial.contactEquationRelaxation = 4
+
+        // Static ground plane
+        const groundShape = new CANNON.Plane()
+        const groundBody = new CANNON.Body({ mass: 0 })
+        groundBody.addShape(groundShape)
+        groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
+        world.addBody(groundBody)
+        demo.addVisual(groundBody)
+
+        return world
+      }
+    </script>
+  </body>
+</html>

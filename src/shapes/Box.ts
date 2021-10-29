@@ -18,6 +18,8 @@ export class Box extends Shape {
    */
   halfExtents: Vec3
 
+  initHalfExtents: Vec3
+
   /**
    * Used by the contact generator to make contacts with other convex polyhedra for example.
    */
@@ -27,6 +29,9 @@ export class Box extends Shape {
     super({ type: Shape.types.BOX })
 
     this.halfExtents = halfExtents
+    this.initHalfExtents = new Vec3()
+    this.initHalfExtents.copy(this.halfExtents)
+
     this.convexPolyhedronRepresentation = (null as unknown) as ConvexPolyhedron
     this.updateConvexPolyhedronRepresentation()
     this.updateBoundingSphereRadius()
@@ -215,6 +220,14 @@ export class Box extends Shape {
     //         min.z = z;
     //     }
     // });
+  }
+
+  updateScale(scale: Vec3): void {
+    const scaledHalfExtents = this.initHalfExtents.vmul(scale)
+    this.halfExtents.copy(scaledHalfExtents)
+
+    this.updateConvexPolyhedronRepresentation()
+    this.updateBoundingSphereRadius()
   }
 }
 
