@@ -125,11 +125,142 @@
         demo.addVisual(body2)
       })
 
+      demo.addScene('Sphere drop on box plane', () => {
+        const world = setupWorldWithGravity(demo)
+
+        // Box
+        const boxShape = new CANNON.Box(new CANNON.Vec3(10, 10, 0.1))
+        const body1 = new CANNON.Body({ type: CANNON.Body.STATIC })
+        body1.addShape(boxShape)
+        body1.position.set(0, -5, 0)
+        body1.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
+        // body1.linearDamping = 0
+
+        world.addBody(body1)
+        demo.addVisual(body1)
+
+        // Sphere
+        const sphereShape = new CANNON.Sphere(1)
+
+        const body2 = new CANNON.Body({ mass: 5 })
+        body2.addShape(sphereShape)
+        body2.position.set(5, 10, 0)
+        body2.velocity.set(-5, 0, 0)
+
+        const quaternion = new CANNON.Quaternion()
+        quaternion.setFromEuler(0, Math.PI * 0.25, 0)
+        body2.quaternion.copy(quaternion)
+
+        world.addBody(body2)
+        demo.addVisual(body2)
+      })
+
+      demo.addScene('Box drop on box plane', () => {
+        const world = setupWorldWithGravity(demo)
+
+        // Box
+        const boxShape = new CANNON.Box(new CANNON.Vec3(10, 10, 0.1))
+        const body1 = new CANNON.Body({ type: CANNON.Body.STATIC })
+        body1.addShape(boxShape)
+        body1.position.set(0, -5, 0)
+        body1.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
+        // body1.linearDamping = 0
+
+        world.addBody(body1)
+        demo.addVisual(body1)
+
+        // Box
+        const boxShape2 = new CANNON.Box(new CANNON.Vec3(1, 1, 1))
+
+        const body2 = new CANNON.Body({ mass: 5 })
+        body2.addShape(boxShape2)
+        body2.position.set(5, 10, 0)
+        body2.velocity.set(-5, 0, 0)
+
+        world.addBody(body2)
+        demo.addVisual(body2)
+      })
+
+      demo.addScene('Sphere drop on plane', () => {
+        const world = setupWorldWithGravity(demo)
+
+        // Plane
+        const boxShape = new CANNON.Plane()
+        const body1 = new CANNON.Body({ type: CANNON.Body.STATIC })
+        body1.addShape(boxShape)
+        body1.position.set(0, -5, 0)
+        body1.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
+
+        world.addBody(body1)
+        demo.addVisual(body1)
+
+        // Sphere
+        const sphereShape = new CANNON.Sphere(1)
+
+        const body2 = new CANNON.Body({ mass: 5 })
+        body2.addShape(sphereShape)
+        body2.position.set(5, 10, 0)
+        body2.velocity.set(-5, 0, 0)
+
+        const quaternion = new CANNON.Quaternion()
+        quaternion.setFromEuler(0, Math.PI * 0.25, 0)
+        body2.quaternion.copy(quaternion)
+
+        world.addBody(body2)
+        demo.addVisual(body2)
+      })
+
+      demo.addScene('Box drop on plane', () => {
+        const world = setupWorldWithGravity(demo)
+
+        // Plane
+        const boxShape = new CANNON.Plane()
+        const body1 = new CANNON.Body({ type: CANNON.Body.STATIC })
+        body1.addShape(boxShape)
+        body1.position.set(0, -5, 0)
+        body1.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
+
+        world.addBody(body1)
+        demo.addVisual(body1)
+
+        // Box
+        const boxShape2 = new CANNON.Box(new CANNON.Vec3(1, 1, 1))
+
+        const body2 = new CANNON.Body({ mass: 5 })
+        body2.addShape(boxShape2)
+        body2.position.set(5, 10, 0)
+        body2.velocity.set(-5, 0, 0)
+
+        // const quaternion = new CANNON.Quaternion()
+        // quaternion.setFromEuler(0, Math.PI * 0.25, 0)
+        // body2.quaternion.copy(quaternion)
+
+        world.addBody(body2)
+        demo.addVisual(body2)
+      })
+
       demo.start()
 
       function setupWorld(demo) {
         const world = demo.getWorld()
         world.gravity.set(0, 0, 0) // no gravity
+
+        // Tweak contact properties.
+        // Contact stiffness - use to make softer/harder contacts
+        world.defaultContactMaterial.contactEquationStiffness = 1e6
+
+        // Stabilization time in number of timesteps
+        world.defaultContactMaterial.contactEquationRelaxation = 10
+
+        // Max solver iterations: Use more for better force propagation, but keep in mind that it's not very computationally cheap!
+        world.solver.iterations = 5
+
+        return world
+      }
+
+      function setupWorldWithGravity(demo) {
+        const world = demo.getWorld()
+        world.gravity.set(0, -20, 0) // no gravity
 
         // Tweak contact properties.
         // Contact stiffness - use to make softer/harder contacts
