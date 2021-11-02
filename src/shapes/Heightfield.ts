@@ -38,6 +38,7 @@ export class Heightfield extends Shape {
    * An array of numbers, or height values, that are spread out along the x axis.
    */
   data: number[][]
+  initData: number[][]
 
   /**
    * Max value of the data points in the data array.
@@ -54,7 +55,11 @@ export class Heightfield extends Shape {
    * @todo elementSizeX and Y
    * @default 1
    */
-  elementSize: number
+  elementSizeX: number
+  initElementSizeX: number
+
+  elementSizeY: number
+  initElementSizeY: number
 
   /**
    * @default true
@@ -70,6 +75,7 @@ export class Heightfield extends Shape {
    */
   constructor(
     data: number[][],
+
     options: {
       /**
        * Max value of the data points in the data array.
@@ -84,21 +90,27 @@ export class Heightfield extends Shape {
       /**
        * World spacing between the data points in X direction.
        */
-      elementSize?: number
+      elementSizeX?: number
+      elementSizeY?: number
     } = {}
   ) {
     options = Utils.defaults(options, {
       maxValue: null,
       minValue: null,
-      elementSize: 1,
+      elementSizeX: 1,
+      elementSizeY: 1,
     })
 
     super({ type: Shape.types.HEIGHTFIELD })
 
     this.data = data
+    this.initData = data
     this.maxValue = options.maxValue!
     this.minValue = options.minValue!
-    this.elementSize = options.elementSize!
+    this.elementSizeX = options.elementSizeX!
+    this.initElementSizeX = options.elementSizeX!
+    this.elementSizeY = options.elementSizeY!
+    this.initElementSizeY = options.elementSizeY!
 
     if (options.minValue === null) {
       this.updateMinValue()
@@ -214,10 +226,11 @@ export class Heightfield extends Shape {
    */
   getIndexOfPosition(x: number, y: number, result: number[], clamp: boolean): boolean {
     // Get the index of the data points to test against
-    const w = this.elementSize
+    const wx = this.elementSizeX
+    const wy = this.elementSizeY
     const data = this.data
-    let xi = Math.floor(x / w)
-    let yi = Math.floor(y / w)
+    let xi = Math.floor(x / wx)
+    let yi = Math.floor(y / wy)
 
     result[0] = xi
     result[1] = yi
@@ -258,9 +271,10 @@ export class Heightfield extends Shape {
       yi = Math.min(data[0].length - 2, Math.max(0, yi))
     }
 
-    const elementSize = this.elementSize
-    const lowerDist2 = (x / elementSize - xi) ** 2 + (y / elementSize - yi) ** 2
-    const upperDist2 = (x / elementSize - (xi + 1)) ** 2 + (y / elementSize - (yi + 1)) ** 2
+    const elementSizeX = this.elementSizeX
+    const elementSizeY = this.elementSizeY
+    const lowerDist2 = (x / elementSizeX - xi) ** 2 + (y / elementSizeY - yi) ** 2
+    const upperDist2 = (x / elementSizeX - (xi + 1)) ** 2 + (y / elementSizeY - (yi + 1)) ** 2
     const upper = lowerDist2 > upperDist2
     this.getTriangle(xi, yi, upper, a, b, c)
     return upper
@@ -287,10 +301,11 @@ export class Heightfield extends Shape {
    */
   getAabbAtIndex(xi: number, yi: number, { lowerBound, upperBound }: AABB): void {
     const data = this.data
-    const elementSize = this.elementSize
+    const elementSizeX = this.elementSizeX
+    const elementSizeY = this.elementSizeY
 
-    lowerBound.set(xi * elementSize, yi * elementSize, data[xi][yi])
-    upperBound.set((xi + 1) * elementSize, (yi + 1) * elementSize, data[xi + 1][yi + 1])
+    lowerBound.set(xi * elementSizeX, yi * elementSizeY, data[xi][yi])
+    upperBound.set((xi + 1) * elementSizeX, (yi + 1) * elementSizeY, data[xi + 1][yi + 1])
   }
 
   /**
@@ -354,18 +369,19 @@ export class Heightfield extends Shape {
    */
   getTriangle(xi: number, yi: number, upper: boolean, a: Vec3, b: Vec3, c: Vec3): void {
     const data = this.data
-    const elementSize = this.elementSize
+    const elementSizeX = this.elementSizeX
+    const elementSizeY = this.elementSizeY
 
     if (upper) {
       // Top triangle verts
-      a.set((xi + 1) * elementSize, (yi + 1) * elementSize, data[xi + 1][yi + 1])
-      b.set(xi * elementSize, (yi + 1) * elementSize, data[xi][yi + 1])
-      c.set((xi + 1) * elementSize, yi * elementSize, data[xi + 1][yi])
+      a.set((xi + 1) * elementSizeX, (yi + 1) * elementSizeY, data[xi + 1][yi + 1])
+      b.set(xi * elementSizeX, (yi + 1) * elementSizeY, data[xi][yi + 1])
+      c.set((xi + 1) * elementSizeX, yi * elementSizeY, data[xi + 1][yi])
     } else {
       // Top triangle verts
-      a.set(xi * elementSize, yi * elementSize, data[xi][yi])
-      b.set((xi + 1) * elementSize, yi * elementSize, data[xi + 1][yi])
-      c.set(xi * elementSize, (yi + 1) * elementSize, data[xi][yi + 1])
+      a.set(xi * elementSizeX, yi * elementSizeY, data[xi][yi])
+      b.set((xi + 1) * elementSizeX, yi * elementSizeY, data[xi + 1][yi])
+      c.set(xi * elementSizeX, (yi + 1) * elementSizeY, data[xi][yi + 1])
     }
   }
 
@@ -392,7 +408,8 @@ export class Heightfield extends Shape {
     }
 
     const data = this.data
-    const elementSize = this.elementSize
+    const elementSizeX = this.elementSizeX
+    const elementSizeY = this.elementSizeY
     const faces = result.faces
 
     // Reuse verts if possible
@@ -420,20 +437,20 @@ export class Heightfield extends Shape {
     if (!getUpperTriangle) {
       // Center of the triangle pillar - all polygons are given relative to this one
       offsetResult.set(
-        (xi + 0.25) * elementSize, // sort of center of a triangle
-        (yi + 0.25) * elementSize,
+        (xi + 0.25) * elementSizeX, // sort of center of a triangle
+        (yi + 0.25) * elementSizeY,
         h // vertical center
       )
 
       // Top triangle verts
-      verts[0].set(-0.25 * elementSize, -0.25 * elementSize, data[xi][yi] - h)
-      verts[1].set(0.75 * elementSize, -0.25 * elementSize, data[xi + 1][yi] - h)
-      verts[2].set(-0.25 * elementSize, 0.75 * elementSize, data[xi][yi + 1] - h)
+      verts[0].set(-0.25 * elementSizeX, -0.25 * elementSizeY, data[xi][yi] - h)
+      verts[1].set(0.75 * elementSizeX, -0.25 * elementSizeY, data[xi + 1][yi] - h)
+      verts[2].set(-0.25 * elementSizeX, 0.75 * elementSizeY, data[xi][yi + 1] - h)
 
       // bottom triangle verts
-      verts[3].set(-0.25 * elementSize, -0.25 * elementSize, -Math.abs(h) - 1)
-      verts[4].set(0.75 * elementSize, -0.25 * elementSize, -Math.abs(h) - 1)
-      verts[5].set(-0.25 * elementSize, 0.75 * elementSize, -Math.abs(h) - 1)
+      verts[3].set(-0.25 * elementSizeX, -0.25 * elementSizeY, -Math.abs(h) - 1)
+      verts[4].set(0.75 * elementSizeX, -0.25 * elementSizeY, -Math.abs(h) - 1)
+      verts[5].set(-0.25 * elementSizeX, 0.75 * elementSizeY, -Math.abs(h) - 1)
 
       // top triangle
       faces[0][0] = 0
@@ -465,20 +482,20 @@ export class Heightfield extends Shape {
     } else {
       // Center of the triangle pillar - all polygons are given relative to this one
       offsetResult.set(
-        (xi + 0.75) * elementSize, // sort of center of a triangle
-        (yi + 0.75) * elementSize,
+        (xi + 0.75) * elementSizeX, // sort of center of a triangle
+        (yi + 0.75) * elementSizeY,
         h // vertical center
       )
 
       // Top triangle verts
-      verts[0].set(0.25 * elementSize, 0.25 * elementSize, data[xi + 1][yi + 1] - h)
-      verts[1].set(-0.75 * elementSize, 0.25 * elementSize, data[xi][yi + 1] - h)
-      verts[2].set(0.25 * elementSize, -0.75 * elementSize, data[xi + 1][yi] - h)
+      verts[0].set(0.25 * elementSizeX, 0.25 * elementSizeY, data[xi + 1][yi + 1] - h)
+      verts[1].set(-0.75 * elementSizeX, 0.25 * elementSizeY, data[xi][yi + 1] - h)
+      verts[2].set(0.25 * elementSizeX, -0.75 * elementSizeY, data[xi + 1][yi] - h)
 
       // bottom triangle verts
-      verts[3].set(0.25 * elementSize, 0.25 * elementSize, -Math.abs(h) - 1)
-      verts[4].set(-0.75 * elementSize, 0.25 * elementSize, -Math.abs(h) - 1)
-      verts[5].set(0.25 * elementSize, -0.75 * elementSize, -Math.abs(h) - 1)
+      verts[3].set(0.25 * elementSizeX, 0.25 * elementSizeY, -Math.abs(h) - 1)
+      verts[4].set(-0.75 * elementSizeX, 0.25 * elementSizeY, -Math.abs(h) - 1)
+      verts[5].set(0.25 * elementSizeX, -0.75 * elementSizeY, -Math.abs(h) - 1)
 
       // Top triangle
       faces[0][0] = 0
@@ -538,7 +555,7 @@ export class Heightfield extends Shape {
     // Use the bounding box of the min/max values
     const data = this.data
 
-    const s = this.elementSize
+    const s = Math.max(this.elementSizeX, this.elementSizeY)
     this.boundingSphereRadius = new Vec3(
       data.length * s,
       data[0].length * s,
@@ -560,7 +577,9 @@ export class Heightfield extends Shape {
 
     const matrix = this.data
     matrix.length = 0
-    this.elementSize = Math.abs(x) / imageData.width
+    this.elementSizeX = Math.abs(x) / imageData.width
+    this.elementSizeY = Math.abs(y) / imageData.height
+
     for (let i = 0; i < imageData.height; i++) {
       const row = []
       for (let j = 0; j < imageData.width; j++) {
@@ -586,8 +605,22 @@ export class Heightfield extends Shape {
   }
 
   updateScale(scale: Vec3): void {
-    // setHeightsFromImage uses a scale value already
-    console.log('updateScale heightfield')
+    const { x, z, y } = scale
+    const data = this.initData
+
+    for (let i = 0; i !== data.length; i++) {
+      for (let j = 0; j !== data[i].length; j++) {
+        data[i][j] = data[i][j] * z
+      }
+    }
+
+    this.elementSizeX = this.initElementSizeX * x
+    this.elementSizeY = this.initElementSizeY * y
+
+    this.updateMaxValue()
+    this.updateMinValue()
+    this.update()
+    this.updateBoundingSphereRadius()
   }
 }
 

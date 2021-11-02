@@ -1155,7 +1155,9 @@ export class Narrowphase {
   ): true | void {
     const data = hfShape.data
     const radius = sphereShape.radius
-    const w = hfShape.elementSize
+
+    /** @TODO Properly use elementSizeX and Y */
+    const w = hfShape.elementSizeX
     const worldPillarOffset = sphereHeightfield_tmp2
 
     // Get sphere position to heightfield local!
@@ -1316,7 +1318,9 @@ export class Narrowphase {
     justTest?: boolean
   ): true | void {
     const data = hfShape.data
-    const w = hfShape.elementSize
+
+    const wx = hfShape.elementSizeX
+    const wy = hfShape.elementSizeY
     const radius = convexShape.boundingSphereRadius
     const worldPillarOffset = convexHeightfield_tmp2
     const faceList = convexHeightfield_faceList
@@ -1326,11 +1330,10 @@ export class Narrowphase {
     Transform.pointToLocalFrame(hfPos, hfQuat, convexPos, localConvexPos)
 
     // Get the index of the data points to test against
-    let iMinX = Math.floor((localConvexPos.x - radius) / w) - 1
-
-    let iMaxX = Math.ceil((localConvexPos.x + radius) / w) + 1
-    let iMinY = Math.floor((localConvexPos.y - radius) / w) - 1
-    let iMaxY = Math.ceil((localConvexPos.y + radius) / w) + 1
+    let iMinX = Math.floor((localConvexPos.x - radius) / wx) - 1
+    let iMaxX = Math.ceil((localConvexPos.x + radius) / wx) + 1
+    let iMinY = Math.floor((localConvexPos.y - radius) / wy) - 1
+    let iMaxY = Math.ceil((localConvexPos.y + radius) / wy) + 1
 
     // Bail out if we are out of the terrain
     if (iMaxX < 0 || iMaxY < 0 || iMinX > data.length || iMinY > data[0].length) {

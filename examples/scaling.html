@@ -163,6 +163,63 @@
         demo.addVisual(body)
       })
 
+      demo.addScene('Heightfield', () => {
+        const world = setupWorldWNoGround(demo)
+
+        // Create a matrix of height values
+        const matrix = []
+        const sizeX = 15
+        const sizeZ = 15
+        const scaleX = 1
+        const scaleY = 0.8
+        const scaleZ = 1.2
+
+        for (let i = 0; i < sizeX; i++) {
+          matrix.push([])
+          for (let j = 0; j < sizeZ; j++) {
+            if (i === 0 || i === sizeX - 1 || j === 0 || j === sizeZ - 1) {
+              const height = 3
+              matrix[i].push(height)
+              continue
+            }
+
+            const height = Math.cos((i / sizeX) * Math.PI * 2) * Math.cos((j / sizeZ) * Math.PI * 2) + 2
+            matrix[i].push(height)
+          }
+        }
+
+        // Create the heightfield
+        const heightfieldShape = new CANNON.Heightfield(matrix)
+        const heightfieldBody = new CANNON.Body({ mass: 0, scale: new CANNON.Vec3(scaleX, scaleY, scaleZ) })
+        heightfieldBody.addShape(heightfieldShape)
+        heightfieldBody.position.set(
+          -((sizeX - 1) * heightfieldShape.elementSizeX) / 2,
+          -4,
+          ((sizeZ - 1) * heightfieldShape.elementSizeY) / 2
+        )
+        heightfieldBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
+        world.addBody(heightfieldBody)
+        demo.addVisual(heightfieldBody)
+
+        // Add spheres
+        const mass = 1
+        for (let i = 0; i < sizeX - 1; i++) {
+          for (let j = 0; j < sizeZ - 1; j++) {
+            if (i === 0 || i >= sizeX - 2 || j === 0 || j >= sizeZ - 2) {
+              continue
+            }
+
+            const sphereShape = new CANNON.Sphere(0.1)
+            const sphereBody = new CANNON.Body({ mass })
+            sphereBody.addShape(sphereShape)
+            sphereBody.position.set((i + 0.25) * scaleX, 4 * scaleZ, (-j + 0.25) * scaleY)
+            sphereBody.position.vadd(heightfieldBody.position, sphereBody.position)
+            world.addBody(sphereBody)
+            demo.addVisual(sphereBody)
+          }
+        }
+      })
+
       demo.start()
 
       function setupWorld(demo) {
@@ -183,6 +240,13 @@
         groundBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0)
         world.addBody(groundBody)
         demo.addVisual(groundBody)
+
+        return world
+      }
+
+      function setupWorldWNoGround(demo) {
+        const world = demo.getWorld()
+        world.gravity.set(0, -10, 0)
 
         return world
       }

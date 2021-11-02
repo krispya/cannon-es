@@ -369,7 +369,6 @@ export class Ray {
 
   _intersectHeightfield(shape: Heightfield, quat: Quaternion, position: Vec3, body: Body, reportedShape: Shape): void {
     const data = shape.data
-    const w = shape.elementSize
     // Convert the ray to local heightfield coordinates
     const localRay = intersectHeightfield_localRay //new Ray(this.from, this.to);
     localRay.from.copy(this.from)
