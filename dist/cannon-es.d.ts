@@ -333,9 +333,13 @@ declare module "shapes/Heightfield" {
     };
     export class Heightfield extends Shape {
         data: number[][];
+        initData: number[][];
         maxValue: number | null;
         minValue: number | null;
-        elementSize: number;
+        elementSizeX: number;
+        initElementSizeX: number;
+        elementSizeY: number;
+        initElementSizeY: number;
         cacheEnabled: boolean;
         pillarConvex: ConvexPolyhedron;
         pillarOffset: Vec3;
@@ -343,7 +347,8 @@ declare module "shapes/Heightfield" {
         constructor(data: number[][], options?: {
             maxValue?: number | null;
             minValue?: number | null;
-            elementSize?: number;
+            elementSizeX?: number;
+            elementSizeY?: number;
         });
         update(): void;
         updateMinValue(): void;

@@ -5023,8 +5023,7 @@ class Ray {
   }
 
   _intersectHeightfield(shape, quat, position, body, reportedShape) {
-    shape.data;
-    shape.elementSize; // Convert the ray to local heightfield coordinates
+    shape.data; // Convert the ray to local heightfield coordinates
 
     const localRay = intersectHeightfield_localRay; //new Ray(this.from, this.to);
 
@@ -8691,23 +8690,32 @@ class Heightfield extends Shape {
     options = Utils.defaults(options, {
       maxValue: null,
       minValue: null,
-      elementSize: 1
+      elementSizeX: 1,
+      elementSizeY: 1
     });
     super({
       type: Shape.types.HEIGHTFIELD
     });
     this.data = void 0;
+    this.initData = void 0;
     this.maxValue = void 0;
     this.minValue = void 0;
-    this.elementSize = void 0;
+    this.elementSizeX = void 0;
+    this.initElementSizeX = void 0;
+    this.elementSizeY = void 0;
+    this.initElementSizeY = void 0;
     this.cacheEnabled = void 0;
     this.pillarConvex = void 0;
     this.pillarOffset = void 0;
     this._cachedPillars = void 0;
     this.data = data;
+    this.initData = data;
     this.maxValue = options.maxValue;
     this.minValue = options.minValue;
-    this.elementSize = options.elementSize;
+    this.elementSizeX = options.elementSizeX;
+    this.initElementSizeX = options.elementSizeX;
+    this.elementSizeY = options.elementSizeY;
+    this.initElementSizeY = options.elementSizeY;
 
     if (options.minValue === null) {
       this.updateMinValue();
@@ -8836,10 +8844,11 @@ class Heightfield extends Shape {
 
   getIndexOfPosition(x, y, result, clamp) {
     // Get the index of the data points to test against
-    const w = this.elementSize;
+    const wx = this.elementSizeX;
+    const wy = this.elementSizeY;
     const data = this.data;
-    let xi = Math.floor(x / w);
-    let yi = Math.floor(y / w);
+    let xi = Math.floor(x / wx);
+    let yi = Math.floor(y / wy);
     result[0] = xi;
     result[1] = yi;
 
@@ -8882,9 +8891,10 @@ class Heightfield extends Shape {
       yi = Math.min(data[0].length - 2, Math.max(0, yi));
     }
 
-    const elementSize = this.elementSize;
-    const lowerDist2 = (x / elementSize - xi) ** 2 + (y / elementSize - yi) ** 2;
-    const upperDist2 = (x / elementSize - (xi + 1)) ** 2 + (y / elementSize - (yi + 1)) ** 2;
+    const elementSizeX = this.elementSizeX;
+    const elementSizeY = this.elementSizeY;
+    const lowerDist2 = (x / elementSizeX - xi) ** 2 + (y / elementSizeY - yi) ** 2;
+    const upperDist2 = (x / elementSizeX - (xi + 1)) ** 2 + (y / elementSizeY - (yi + 1)) ** 2;
     const upper = lowerDist2 > upperDist2;
     this.getTriangle(xi, yi, upper, a, b, c);
     return upper;
@@ -8915,9 +8925,10 @@ class Heightfield extends Shape {
     upperBound
   }) {
     const data = this.data;
-    const elementSize = this.elementSize;
-    lowerBound.set(xi * elementSize, yi * elementSize, data[xi][yi]);
-    upperBound.set((xi + 1) * elementSize, (yi + 1) * elementSize, data[xi + 1][yi + 1]);
+    const elementSizeX = this.elementSizeX;
+    const elementSizeY = this.elementSizeY;
+    lowerBound.set(xi * elementSizeX, yi * elementSizeY, data[xi][yi]);
+    upperBound.set((xi + 1) * elementSizeX, (yi + 1) * elementSizeY, data[xi + 1][yi + 1]);
   }
   /**
    * Get the height in the heightfield at a given position
@@ -8977,18 +8988,19 @@ class Heightfield extends Shape {
 
   getTriangle(xi, yi, upper, a, b, c) {
     const data = this.data;
-    const elementSize = this.elementSize;
+    const elementSizeX = this.elementSizeX;
+    const elementSizeY = this.elementSizeY;
 
     if (upper) {
       // Top triangle verts
-      a.set((xi + 1) * elementSize, (yi + 1) * elementSize, data[xi + 1][yi + 1]);
-      b.set(xi * elementSize, (yi + 1) * elementSize, data[xi][yi + 1]);
-      c.set((xi + 1) * elementSize, yi * elementSize, data[xi + 1][yi]);
+      a.set((xi + 1) * elementSizeX, (yi + 1) * elementSizeY, data[xi + 1][yi + 1]);
+      b.set(xi * elementSizeX, (yi + 1) * elementSizeY, data[xi][yi + 1]);
+      c.set((xi + 1) * elementSizeX, yi * elementSizeY, data[xi + 1][yi]);
     } else {
       // Top triangle verts
-      a.set(xi * elementSize, yi * elementSize, data[xi][yi]);
-      b.set((xi + 1) * elementSize, yi * elementSize, data[xi + 1][yi]);
-      c.set(xi * elementSize, (yi + 1) * elementSize, data[xi][yi + 1]);
+      a.set(xi * elementSizeX, yi * elementSizeY, data[xi][yi]);
+      b.set((xi + 1) * elementSizeX, yi * elementSizeY, data[xi + 1][yi]);
+      c.set(xi * elementSizeX, (yi + 1) * elementSizeY, data[xi][yi + 1]);
     }
   }
   /**
@@ -9016,7 +9028,8 @@ class Heightfield extends Shape {
     }
 
     const data = this.data;
-    const elementSize = this.elementSize;
+    const elementSizeX = this.elementSizeX;
+    const elementSizeY = this.elementSizeY;
     const faces = result.faces; // Reuse verts if possible
 
     result.vertices.length = 6;
@@ -9041,17 +9054,17 @@ class Heightfield extends Shape {
 
     if (!getUpperTriangle) {
       // Center of the triangle pillar - all polygons are given relative to this one
-      offsetResult.set((xi + 0.25) * elementSize, // sort of center of a triangle
-      (yi + 0.25) * elementSize, h // vertical center
+      offsetResult.set((xi + 0.25) * elementSizeX, // sort of center of a triangle
+      (yi + 0.25) * elementSizeY, h // vertical center
       ); // Top triangle verts
 
-      verts[0].set(-0.25 * elementSize, -0.25 * elementSize, data[xi][yi] - h);
-      verts[1].set(0.75 * elementSize, -0.25 * elementSize, data[xi + 1][yi] - h);
-      verts[2].set(-0.25 * elementSize, 0.75 * elementSize, data[xi][yi + 1] - h); // bottom triangle verts
+      verts[0].set(-0.25 * elementSizeX, -0.25 * elementSizeY, data[xi][yi] - h);
+      verts[1].set(0.75 * elementSizeX, -0.25 * elementSizeY, data[xi + 1][yi] - h);
+      verts[2].set(-0.25 * elementSizeX, 0.75 * elementSizeY, data[xi][yi + 1] - h); // bottom triangle verts
 
-      verts[3].set(-0.25 * elementSize, -0.25 * elementSize, -Math.abs(h) - 1);
-      verts[4].set(0.75 * elementSize, -0.25 * elementSize, -Math.abs(h) - 1);
-      verts[5].set(-0.25 * elementSize, 0.75 * elementSize, -Math.abs(h) - 1); // top triangle
+      verts[3].set(-0.25 * elementSizeX, -0.25 * elementSizeY, -Math.abs(h) - 1);
+      verts[4].set(0.75 * elementSizeX, -0.25 * elementSizeY, -Math.abs(h) - 1);
+      verts[5].set(-0.25 * elementSizeX, 0.75 * elementSizeY, -Math.abs(h) - 1); // top triangle
 
       faces[0][0] = 0;
       faces[0][1] = 1;
@@ -9077,17 +9090,17 @@ class Heightfield extends Shape {
       faces[4][3] = 1;
     } else {
       // Center of the triangle pillar - all polygons are given relative to this one
-      offsetResult.set((xi + 0.75) * elementSize, // sort of center of a triangle
-      (yi + 0.75) * elementSize, h // vertical center
+      offsetResult.set((xi + 0.75) * elementSizeX, // sort of center of a triangle
+      (yi + 0.75) * elementSizeY, h // vertical center
       ); // Top triangle verts
 
-      verts[0].set(0.25 * elementSize, 0.25 * elementSize, data[xi + 1][yi + 1] - h);
-      verts[1].set(-0.75 * elementSize, 0.25 * elementSize, data[xi][yi + 1] - h);
-      verts[2].set(0.25 * elementSize, -0.75 * elementSize, data[xi + 1][yi] - h); // bottom triangle verts
+      verts[0].set(0.25 * elementSizeX, 0.25 * elementSizeY, data[xi + 1][yi + 1] - h);
+      verts[1].set(-0.75 * elementSizeX, 0.25 * elementSizeY, data[xi][yi + 1] - h);
+      verts[2].set(0.25 * elementSizeX, -0.75 * elementSizeY, data[xi + 1][yi] - h); // bottom triangle verts
 
-      verts[3].set(0.25 * elementSize, 0.25 * elementSize, -Math.abs(h) - 1);
-      verts[4].set(-0.75 * elementSize, 0.25 * elementSize, -Math.abs(h) - 1);
-      verts[5].set(0.25 * elementSize, -0.75 * elementSize, -Math.abs(h) - 1); // Top triangle
+      verts[3].set(0.25 * elementSizeX, 0.25 * elementSizeY, -Math.abs(h) - 1);
+      verts[4].set(-0.75 * elementSizeX, 0.25 * elementSizeY, -Math.abs(h) - 1);
+      verts[5].set(0.25 * elementSizeX, -0.75 * elementSizeY, -Math.abs(h) - 1); // Top triangle
 
       faces[0][0] = 0;
       faces[0][1] = 1;
@@ -9139,7 +9152,7 @@ class Heightfield extends Shape {
   updateBoundingSphereRadius() {
     // Use the bounding box of the min/max values
     const data = this.data;
-    const s = this.elementSize;
+    const s = Math.max(this.elementSizeX, this.elementSizeY);
     this.boundingSphereRadius = new Vec3(data.length * s, data[0].length * s, Math.max(Math.abs(this.maxValue), Math.abs(this.minValue))).length();
   }
   /**
@@ -9161,7 +9174,8 @@ class Heightfield extends Shape {
     const imageData = context.getImageData(0, 0, image.width, image.height);
     const matrix = this.data;
     matrix.length = 0;
-    this.elementSize = Math.abs(x) / imageData.width;
+    this.elementSizeX = Math.abs(x) / imageData.width;
+    this.elementSizeY = Math.abs(y) / imageData.height;
 
     for (let i = 0; i < imageData.height; i++) {
       const row = [];
@@ -9192,8 +9206,25 @@ class Heightfield extends Shape {
   }
 
   updateScale(scale) {
-    // setHeightsFromImage uses a scale value already
-    console.log('updateScale heightfield');
+    const {
+      x,
+      z,
+      y
+    } = scale;
+    const data = this.initData;
+
+    for (let i = 0; i !== data.length; i++) {
+      for (let j = 0; j !== data[i].length; j++) {
+        data[i][j] = data[i][j] * z;
+      }
+    }
+
+    this.elementSizeX = this.initElementSizeX * x;
+    this.elementSizeY = this.initElementSizeY * y;
+    this.updateMaxValue();
+    this.updateMinValue();
+    this.update();
+    this.updateBoundingSphereRadius();
   }
 
 }
@@ -11375,7 +11406,9 @@ class Narrowphase {
   sphereHeightfield(sphereShape, hfShape, spherePos, hfPos, sphereQuat, hfQuat, sphereBody, hfBody, rsi, rsj, justTest) {
     const data = hfShape.data;
     const radius = sphereShape.radius;
-    const w = hfShape.elementSize;
+    /** @TODO Properly use elementSizeX and Y */
+
+    const w = hfShape.elementSizeX;
     const worldPillarOffset = sphereHeightfield_tmp2; // Get sphere position to heightfield local!
 
     const localSpherePos = sphereHeightfield_tmp1;
@@ -11486,7 +11519,8 @@ class Narrowphase {
 
   convexHeightfield(convexShape, hfShape, convexPos, hfPos, convexQuat, hfQuat, convexBody, hfBody, rsi, rsj, justTest) {
     const data = hfShape.data;
-    const w = hfShape.elementSize;
+    const wx = hfShape.elementSizeX;
+    const wy = hfShape.elementSizeY;
     const radius = convexShape.boundingSphereRadius;
     const worldPillarOffset = convexHeightfield_tmp2;
     const faceList = convexHeightfield_faceList; // Get sphere position to heightfield local!
@@ -11494,10 +11528,10 @@ class Narrowphase {
     const localConvexPos = convexHeightfield_tmp1;
     Transform.pointToLocalFrame(hfPos, hfQuat, convexPos, localConvexPos); // Get the index of the data points to test against
 
-    let iMinX = Math.floor((localConvexPos.x - radius) / w) - 1;
-    let iMaxX = Math.ceil((localConvexPos.x + radius) / w) + 1;
-    let iMinY = Math.floor((localConvexPos.y - radius) / w) - 1;
-    let iMaxY = Math.ceil((localConvexPos.y + radius) / w) + 1; // Bail out if we are out of the terrain
+    let iMinX = Math.floor((localConvexPos.x - radius) / wx) - 1;
+    let iMaxX = Math.ceil((localConvexPos.x + radius) / wx) + 1;
+    let iMinY = Math.floor((localConvexPos.y - radius) / wy) - 1;
+    let iMaxY = Math.ceil((localConvexPos.y + radius) / wy) + 1; // Bail out if we are out of the terrain
 
     if (iMaxX < 0 || iMaxY < 0 || iMinX > data.length || iMinY > data[0].length) {
       return;
